@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QScrollbar>
 #include <QPalette>
+#include <QTextCursor>
+#include <QTextCharFormat>
 
 enum CustomRoles {
     LyricsRole = Qt::UserRole + 1,
@@ -72,11 +74,26 @@ ReverseSearchWindow::ReverseSearchWindow(DataModel *model, QWidget *parent) : QM
         Q_UNUSED(previous);
         if (!current)
             return;
-        lyricDisplay->setPlainText(current->data(0, LyricsRole).toString());
 
-        // Highlight the search string
+        QString lyricData = current->data(0, LyricsRole).toString();
+        lyricDisplay->setPlainText(lyricData);
         lyricDisplay->setFocus();
-        lyricDisplay->find(searchString->text());
+
+        // Highlight all occurances of the search string
+
+        QTextCharFormat fmt;
+        fmt.setBackground(QColor(255, 127, 0));
+
+        int lastIndex = 0;
+        int matchIndex = -1;
+        while ((matchIndex = lyricData.indexOf(searchString->text(), lastIndex + 1, Qt::CaseInsensitive)) > 0) {
+            QTextCursor cursor(lyricDisplay->document());
+            cursor.setPosition(matchIndex, QTextCursor::MoveAnchor);
+            cursor.setPosition(matchIndex + searchString->text().length(), QTextCursor::KeepAnchor);
+            cursor.setCharFormat(fmt);
+
+            lastIndex = matchIndex;
+        }
 
         lyricDisplay->centerCursor();
     });
