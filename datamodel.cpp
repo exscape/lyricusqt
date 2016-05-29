@@ -170,6 +170,8 @@ QString DataModel::lyricsForFile(const QString &path) {
         else
             return {};
     }
+
+    return {};
 }
 
 bool DataModel::setLyricsForFile(const QString &path, const QString &lyrics) {
@@ -210,28 +212,16 @@ bool DataModel::setLyricsForFile(const QString &path, const QString &lyrics) {
 
     }
     else if (path.endsWith(".m4a")) {
-
-        //
-        // TODO: Implement M4A tag writing
-        //
-
-        /*
         TagLib::MP4::File file(QFile::encodeName(path).constData());
         if (!file.isOpen() || !file.isValid())
             return {};
 
-        TagLib::MP4::Item item = file.tag()->itemListMap()["\xa9lyr"];
-        if (!item.isValid())
+        file.tag()->itemListMap()["\xa9lyr"] = TagLib::StringList(QStringToTString(lyrics));
 
-        TagLib::StringList strings = item.toStringList();
-        if (!strings.isEmpty()) {
-            return strings.front().toCString(true);
-        }
-        else
-            return {};
-        return false;
-        */
+        return file.save();
     }
+
+    return false;
 }
 
 void DataModel::updateIndex() {
