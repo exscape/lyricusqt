@@ -16,8 +16,6 @@
 #include <QMessageBox>
 #include <QApplication>
 
-#include <QSqlRecord>
-
 DataModel::DataModel() {
     db = QSqlDatabase::addDatabase("QSQLITE");
     QString dbpath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -37,7 +35,6 @@ DataModel::DataModel() {
 
     // This database might not have existed a few milliseconds ago, so we'll have to
     // set it up, if necessary.
-
     QSqlQuery createQuery;
     if(!createQuery.exec("CREATE TABLE IF NOT EXISTS data ("
                  "id INTEGER PRIMARY KEY,"
@@ -46,26 +43,10 @@ DataModel::DataModel() {
                      "album TEXT,"
                      "lyrics TEXT);"
                      )) {
-        qCritical() << "CREATE TABLE query failed!";
         QMessageBox::critical(nullptr, "Unable to create database table", "I was unable to create the database table used to store lyric data. This is a critical error, and the application will now exit.", QMessageBox::Ok, QMessageBox::NoButton);
         exit(1);
     }
     qDebug() << "Database set up/opened successfully";
-
-    /*
-
-    while(q.next()) {
-        QString title = q.value(0).toString().trimmed();
-        QString lyrics = q.value(1).toString().trimmed();
-        QMessageBox::information(this, title, lyrics, QMessageBox::Ok);
-    }
-
-    TagLib::FileRef f(R"(i:\Music\iTunes\iTunes Media\Music\Animals as Leaders\Animals As Leaders\01 Tempting Time.mp3)");
-    auto s = f.tag()->artist();
-    QString art = "Artist: ";
-    art += s.toCString(true);
-    QMessageBox::information(this, "Hello world!", art, QMessageBox::Ok);
-    */
 }
 
 void DataModel::indexFilesRecursively(const QString &sDir, int max_depth) {
@@ -78,7 +59,6 @@ void DataModel::indexFilesRecursively(const QString &sDir, int max_depth) {
         QString sFilePath = info.filePath();
         QString absPath = info.absoluteFilePath();
 
-        // TODO: fix proper support for all file types
         if (absPath.endsWith(".mp3", Qt::CaseInsensitive)|| absPath.endsWith(".m4a", Qt::CaseInsensitive)) {
             indexFile(absPath);
         }
@@ -117,10 +97,6 @@ void DataModel::indexFile(const QString &path) {
     if (lyrics.length() < 1)
         return;
 
-
-
-
-
     qDebug() << "Lyrics begin with:" << lyrics.mid(0, 25) << "...";
 
     QSqlQuery query;
@@ -146,12 +122,6 @@ QList<Track> DataModel::tracksMatchingLyrics(const QString &partialLyrics) {
     query.prepare("SELECT artist,title,album,lyrics FROM data WHERE lyrics LIKE :part");
     query.bindValue(":part", "%" + partialLyrics + "%");
     query.exec();
-    if (query.size() == 0) {
-        qDebug() << "Query size is 0";
-        return {};
-    }
-    else
-        qDebug() << "Query succeeded with hits";
 
     QList<Track> results;
 
@@ -164,26 +134,19 @@ QList<Track> DataModel::tracksMatchingLyrics(const QString &partialLyrics) {
         results.append(Track(artist, title, album, lyrics));
     }
 
-    /*
-    for (const Track &track : results) {
-        qDebug() << track.artist << "-" << track.title << "[" << track.album << "]" << ":" << track.lyrics.mid(0, 20);
-    }
-    */
-
     return results;
 }
 
 QString DataModel::lyricsForFile(const QString &path) {
     if (path.endsWith(".mp3")) {
         TagLib::MPEG::File mpf(QFile::encodeName(path).constData());
-        if (!mpf.isOpen() || !mpf.isValid()) {
-            qDebug() << "OPEN FAILED, continuing...";
+        if (!mpf.isOpen() || !mpf.isValid())
             return {};
-        }
+
         auto *id3v2tag = mpf.ID3v2Tag();
         if (!id3v2tag)
             return {};
-    //        qDebug() << "Listing frames";
+
         TagLib::ID3v2::FrameList frames = id3v2tag->frameListMap()["USLT"];
         if (frames.isEmpty())
             return {};
@@ -196,11 +159,16 @@ QString DataModel::lyricsForFile(const QString &path) {
     }
     else if (path.endsWith(".m4a")) {
         TagLib::MP4::File file(QFile::encodeName(path).constData());
+        if (!file.isOpen() || !file.isValid())
+            return {};
+
         TagLib::MP4::Item item = file.tag()->itemListMap()["\xa9lyr"];
         TagLib::StringList strings = item.toStringList();
         if (!strings.isEmpty()) {
             return strings.front().toCString(true);
         }
+        else
+            return {};
     }
 }
 

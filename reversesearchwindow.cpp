@@ -24,7 +24,6 @@ void ReverseSearchWindow::searchStringUpdated(QString newString) {
     QList<QTreeWidgetItem*> items;
     for (const Track &track : data) {
         auto *item = new QTreeWidgetItem({ track.artist/*, track.album*/, track.title });
-//        item->setFlags(item->flags() | Qt::ItemIsEditable);
         item->setData(0, LyricsRole, track.lyrics);
         items.append(item);
     }
@@ -68,8 +67,6 @@ ReverseSearchWindow::ReverseSearchWindow(DataModel *model, QWidget *parent) : QM
     results->header()->setMinimumSectionSize(75);
     results->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     results->header()->setStretchLastSection(true);
-//    results->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-//    results->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     connect(results, &QTreeWidget::currentItemChanged, [&](QTreeWidgetItem *current, QTreeWidgetItem *previous) {
         Q_UNUSED(previous);
         if (!current)
