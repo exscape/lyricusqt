@@ -117,26 +117,13 @@ void DataModel::indexFile(const QString &path) {
     if (artist.length() < 1 || title.length() < 1)
         return;
 
-    TagLib::MPEG::File mpf(QFile::encodeName(path).constData());
-    if (!mpf.isOpen() || !mpf.isValid()) {
-        qDebug() << "OPEN FAILED, continuing...";
-        return;
-    }
-    auto *id3v2tag = mpf.ID3v2Tag();
-    if (!id3v2tag)
-        return;
-//        qDebug() << "Listing frames";
-    TagLib::ID3v2::FrameList frames = id3v2tag->frameListMap()["USLT"];
-    if (frames.isEmpty())
-        return;
-
-    auto *frame = dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame*>(frames.front());
-    if (!frame)
-        return;
-
-    QString lyrics = frame->text().toCString(true);
+    QString lyrics = lyricsForFile(path);
     if (lyrics.length() < 1)
         return;
+
+
+
+
 
     qDebug() << "Lyrics begin with:" << lyrics.mid(0, 25) << "...";
 
@@ -188,6 +175,27 @@ QList<Track> DataModel::tracksMatchingLyrics(const QString &partialLyrics) {
     */
 
     return results;
+}
+
+QString DataModel::lyricsForFile(const QString &path) {
+    TagLib::MPEG::File mpf(QFile::encodeName(path).constData());
+    if (!mpf.isOpen() || !mpf.isValid()) {
+        qDebug() << "OPEN FAILED, continuing...";
+        return {};
+    }
+    auto *id3v2tag = mpf.ID3v2Tag();
+    if (!id3v2tag)
+        return {};
+//        qDebug() << "Listing frames";
+    TagLib::ID3v2::FrameList frames = id3v2tag->frameListMap()["USLT"];
+    if (frames.isEmpty())
+        return {};
+
+    auto *frame = dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame*>(frames.front());
+    if (!frame)
+        return {};
+
+    return frame->text().toCString(true);
 }
 
 void DataModel::updateIndex() {

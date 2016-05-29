@@ -18,6 +18,7 @@ public:
 
 private:
     int id = 1;
+    QString lyricsForFile(const QString &path);
     QSqlDatabase db;
 };
 
