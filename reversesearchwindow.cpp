@@ -76,6 +76,7 @@ ReverseSearchWindow::ReverseSearchWindow(DataModel *model, QWidget *parent) : QM
             return;
 
         QString lyricData = current->data(0, LyricsRole).toString();
+        lyricDisplay->document()->clear();
         lyricDisplay->setPlainText(lyricData);
         lyricDisplay->setFocus();
 
@@ -83,7 +84,9 @@ ReverseSearchWindow::ReverseSearchWindow(DataModel *model, QWidget *parent) : QM
 
         QTextCharFormat fmt;
         fmt.setBackground(QColor(255, 127, 0));
+        fmt.setForeground(QColor(Qt::white));
 
+        int firstIndex = -1;
         int lastIndex = 0;
         int matchIndex = -1;
         while ((matchIndex = lyricData.indexOf(searchString->text(), lastIndex + 1, Qt::CaseInsensitive)) > 0) {
@@ -92,14 +95,19 @@ ReverseSearchWindow::ReverseSearchWindow(DataModel *model, QWidget *parent) : QM
             cursor.setPosition(matchIndex + searchString->text().length(), QTextCursor::KeepAnchor);
             cursor.setCharFormat(fmt);
 
+            if (firstIndex == -1) {
+                // Move the cursor to the first hit
+                firstIndex = matchIndex;
+                lyricDisplay->setTextCursor(cursor);
+                lyricDisplay->centerCursor();
+            }
+
             lastIndex = matchIndex;
         }
-
-        lyricDisplay->centerCursor();
     });
 
     QPalette pal = lyricDisplay->palette();
-    pal.setColor(QPalette::Highlight, QColor(200, 0, 0, 200));
+    pal.setColor(QPalette::Highlight, QColor(255, 127, 0));
     pal.setColor(QPalette::HighlightedText, QColor(Qt::white));
     lyricDisplay->setPalette(pal);
 
