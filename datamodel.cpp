@@ -11,12 +11,20 @@
 #include <QtSql/QSqlError>
 #include <QDir>
 #include <QFileInfo>
+#include <QStandardPaths>
+#include <QMessageBox>
+#include <QApplication>
 
 #include <QSqlRecord>
 
 DataModel::DataModel() {
     db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("test.sqlite");
+    QString dbpath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir path = dbpath;
+    path.mkpath(path.absolutePath());
+    dbpath.append("/test.sqlite");
+    qDebug() << "Using database path:" << dbpath;
+    db.setDatabaseName(dbpath);
 
     if (!db.open()) {
         qCritical() << "Unable to open database!";
@@ -25,6 +33,24 @@ DataModel::DataModel() {
     }
     else
         qDebug() << "Database opened! isValid =" << (db.isValid() ? "true" : "false");
+
+    // This database might not have existed a few milliseconds ago, so we'll have to
+    // set it up, if necessary.
+
+    QSqlQuery createQuery;
+    if(!createQuery.exec("CREATE TABLE IF NOT EXISTS data ("
+                 "id INTEGER PRIMARY KEY,"
+                     "artist TEXT,"
+                     "title TEXT,"
+                     "album TEXT,"
+                     "lyrics TEXT);"
+                     )) {
+        qCritical() << "CREATE TABLE query failed!";
+        QMessageBox::critical(nullptr, "Unable to create database table", "I was unable to create the database table used to store lyric data. This is a critical error, and the application will now exit.", QMessageBox::Ok, QMessageBox::NoButton);
+        exit(1);
+    }
+    qDebug() << "Database set up/opened successfully";
+
     /*
 
     while(q.next()) {
@@ -60,6 +86,7 @@ void DataModel::indexFilesRecursively(const QString &sDir, int max_depth) {
             indexFilesRecursively(sFilePath, max_depth - 1);
         }
     }
+
 }
 
 void DataModel::indexFile(const QString &path) {
@@ -67,7 +94,7 @@ void DataModel::indexFile(const QString &path) {
         // TODO: support other file formats
         return;
     }
-    qDebug() << path;
+    qDebug() << "Indexing" << path;
 
     QString artist, title, album;
     {
@@ -104,12 +131,14 @@ void DataModel::indexFile(const QString &path) {
         return;
 
     auto *frame = dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame*>(frames.front());
+    if (!frame)
+        return;
 
     QString lyrics = frame->text().toCString(true);
     if (lyrics.length() < 1)
         return;
 
-    qDebug() << lyrics.mid(0, 25) << "...";
+    qDebug() << "Lyrics begin with:" << lyrics.mid(0, 25) << "...";
 
     QSqlQuery query;
     query.prepare("INSERT INTO data (id, artist, title, album, lyrics) VALUES (:id, :artist, :title, :album, :lyrics)");
@@ -120,12 +149,13 @@ void DataModel::indexFile(const QString &path) {
     query.bindValue(":lyrics", lyrics);
     if (!query.exec()) {
         qDebug() << "Insert query for " << artist << "-" << title << "failed!";
-        qDebug() << query.executedQuery();
-        qDebug() << db.lastError().databaseText();
-        qDebug() << db.lastError().driverText();
+        qDebug() << "Query was: " << query.executedQuery();
+        qDebug() << "database last error: " << db.lastError().databaseText();
+        qDebug() << "driver last error: " << db.lastError().driverText();
+        qDebug() << "---------------------------------------------------------------";
     }
     else
-        qDebug() << "Insert successful";
+        qDebug() << "Insert successful for" << artist << "-" << title;
 }
 
 QList<Track> DataModel::tracksMatchingLyrics(const QString &partialLyrics) {
@@ -133,12 +163,12 @@ QList<Track> DataModel::tracksMatchingLyrics(const QString &partialLyrics) {
     query.prepare("SELECT artist,title,album,lyrics FROM data WHERE lyrics LIKE :part");
     query.bindValue(":part", "%" + partialLyrics + "%");
     query.exec();
-    if (query.size() == 0)
+    if (query.size() == 0) {
         qDebug() << "Query size is 0";
+        return {};
+    }
     else
         qDebug() << "Query succeeded with hits";
-    if (query.size() == 0)
-        return {};
 
     QList<Track> results;
 
@@ -164,6 +194,7 @@ void DataModel::updateIndex() {
     QSqlQuery query("DELETE FROM data");
     id = 1;
     query.exec();
-    indexFilesRecursively("I:/Music/iTunes/iTunes Media/Music", 5);
+    qDebug() << "Updating index...";
+    indexFilesRecursively("D:\\Music\\Music\\Dream Theater", 5);
     db.commit();
 }

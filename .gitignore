@@ -1,4 +1,4 @@
 *-debug
 *-release
 *.pro.user
-taglib-1.9.1
+taglib-1.*

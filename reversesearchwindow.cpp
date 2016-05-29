@@ -77,6 +77,7 @@ ReverseSearchWindow::ReverseSearchWindow(DataModel *model, QWidget *parent) : QM
         // Highlight the search string
         lyricDisplay->setFocus();
         lyricDisplay->find(searchString->text());
+
         lyricDisplay->centerCursor();
     });
 
@@ -85,7 +86,7 @@ ReverseSearchWindow::ReverseSearchWindow(DataModel *model, QWidget *parent) : QM
     pal.setColor(QPalette::HighlightedText, QColor(Qt::white));
     lyricDisplay->setPalette(pal);
 
-    lyricDisplay->setReadOnly(true); // TODO: add edit capabilities
+    lyricDisplay->setReadOnly(true);
 
     connect(searchString, &QLineEdit::textEdited, this, &ReverseSearchWindow::searchStringUpdated);
 
