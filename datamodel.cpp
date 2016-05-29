@@ -3,6 +3,7 @@
 #include <taglib/mpeg/mpegfile.h>
 #include <taglib/mpeg/id3v2/frames/unsynchronizedlyricsframe.h>
 #include <taglib/mpeg/id3v2/id3v2tag.h>
+#include <taglib/mp4/mp4file.h>
 #include <QString>
 #include <QDebug>
 #include <QtSql/QSql>
@@ -78,7 +79,7 @@ void DataModel::indexFilesRecursively(const QString &sDir, int max_depth) {
         QString absPath = info.absoluteFilePath();
 
         // TODO: fix proper support for all file types
-        if (absPath.endsWith(".mp3", Qt::CaseInsensitive)) { // || absPath.endsWith(".m4a", Qt::CaseInsensitive) || absPath.endsWith(".aif")) {
+        if (absPath.endsWith(".mp3", Qt::CaseInsensitive)|| absPath.endsWith(".m4a", Qt::CaseInsensitive)) {
             indexFile(absPath);
         }
 
@@ -86,14 +87,9 @@ void DataModel::indexFilesRecursively(const QString &sDir, int max_depth) {
             indexFilesRecursively(sFilePath, max_depth - 1);
         }
     }
-
 }
 
 void DataModel::indexFile(const QString &path) {
-    if (!path.endsWith(".mp3")) {
-        // TODO: support other file formats
-        return;
-    }
     qDebug() << "Indexing" << path;
 
     QString artist, title, album;
@@ -178,24 +174,34 @@ QList<Track> DataModel::tracksMatchingLyrics(const QString &partialLyrics) {
 }
 
 QString DataModel::lyricsForFile(const QString &path) {
-    TagLib::MPEG::File mpf(QFile::encodeName(path).constData());
-    if (!mpf.isOpen() || !mpf.isValid()) {
-        qDebug() << "OPEN FAILED, continuing...";
-        return {};
+    if (path.endsWith(".mp3")) {
+        TagLib::MPEG::File mpf(QFile::encodeName(path).constData());
+        if (!mpf.isOpen() || !mpf.isValid()) {
+            qDebug() << "OPEN FAILED, continuing...";
+            return {};
+        }
+        auto *id3v2tag = mpf.ID3v2Tag();
+        if (!id3v2tag)
+            return {};
+    //        qDebug() << "Listing frames";
+        TagLib::ID3v2::FrameList frames = id3v2tag->frameListMap()["USLT"];
+        if (frames.isEmpty())
+            return {};
+
+        auto *frame = dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame*>(frames.front());
+        if (!frame)
+            return {};
+
+        return frame->text().toCString(true);
     }
-    auto *id3v2tag = mpf.ID3v2Tag();
-    if (!id3v2tag)
-        return {};
-//        qDebug() << "Listing frames";
-    TagLib::ID3v2::FrameList frames = id3v2tag->frameListMap()["USLT"];
-    if (frames.isEmpty())
-        return {};
-
-    auto *frame = dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame*>(frames.front());
-    if (!frame)
-        return {};
-
-    return frame->text().toCString(true);
+    else if (path.endsWith(".m4a")) {
+        TagLib::MP4::File file(QFile::encodeName(path).constData());
+        TagLib::MP4::Item item = file.tag()->itemListMap()["\xa9lyr"];
+        TagLib::StringList strings = item.toStringList();
+        if (!strings.isEmpty()) {
+            return strings.front().toCString(true);
+        }
+    }
 }
 
 void DataModel::updateIndex() {
