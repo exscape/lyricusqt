@@ -17,14 +17,22 @@ LIBS += $$PWD/taglib-1.11/taglib-release/taglib.dll
 SOURCES += main.cpp\
     datamodel.cpp \
     track.cpp \
-    reversesearchwindow.cpp \
-    mainwindow.cpp
+    UI/reversesearchwindow.cpp \
+    UI/mainwindow.cpp \
+    UI/lyricdownloaderwindow.cpp \
+    lyricfetcher.cpp \
+    Sites/lyricsite.cpp \
+    Sites/darklyricssite.cpp
 
 HEADERS  += \
     datamodel.h \
     track.h \
-    reversesearchwindow.h \
-    mainwindow.h
+    UI/reversesearchwindow.h \
+    UI/mainwindow.h \
+    UI/lyricdownloaderwindow.h \
+    lyricfetcher.h \
+    Sites/lyricsite.h \
+    Sites/darklyricssite.h
 
 INCLUDEPATH += taglib-1.11
 INCLUDEPATH += taglib-1.11/taglib
