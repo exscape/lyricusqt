@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QPlainTextEdit>
 #include "lyricfetcher.h"
 
 class DataModel;
@@ -22,7 +23,8 @@ class LyricDownloaderWindow : public QMainWindow
     QLineEdit *artistLineEdit = nullptr;
     QLineEdit *titleLineEdit = nullptr;
     QPushButton *searchButton = nullptr;
-    
+    QPlainTextEdit *lyricsTextEdit = nullptr;
+
     
 public:
     explicit LyricDownloaderWindow(DataModel *model = 0, QWidget *parent = 0);

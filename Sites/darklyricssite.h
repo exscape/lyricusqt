@@ -4,6 +4,7 @@
 #include "lyricsite.h"
 #include <functional>
 #include <tuple>
+#include <QtNetwork/QNetworkAccessManager>
 
 class DarkLyricsSite : public LyricSite
 {
@@ -12,7 +13,10 @@ public:
     void fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback) override;
 private:
     std::tuple<QString, FetchResult> getArtistURL(const QString &_artist) const;
-    std::tuple<QString, FetchResult> getTrackURL(const QString &title, const QString &artistURL) const;
+    void titleResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
+    void lyricsResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
+
+    QNetworkAccessManager accessManager;
 };
 
 #endif // DARKLYRICSSITE_H

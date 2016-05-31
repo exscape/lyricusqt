@@ -9,7 +9,8 @@ enum class FetchResult {
     InvalidRequest,
     ConnectionFailed,
     RequestFailed,
-    ParsingFailed
+    ParsingFailed,
+    NoMatch
 };
 
 class LyricSite
