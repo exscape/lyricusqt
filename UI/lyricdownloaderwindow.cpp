@@ -30,6 +30,8 @@ LyricDownloaderWindow::LyricDownloaderWindow(DataModel *model, QWidget *parent) 
         lyricFetcher->fetchLyrics(artistLineEdit->text(), titleLineEdit->text(), [&](const QString &lyrics, FetchResult result) {
             if (result == FetchResult::Success)
                 lyricsTextEdit->setPlainText(lyrics);
+            else if (result == FetchResult::NoMatch)
+                lyricsTextEdit->setPlainText(QString("No results for %1 - %2").arg(artistLineEdit->text(), titleLineEdit->text()));
             else
                 lyricsTextEdit->setPlainText("An error occured!");
         });
