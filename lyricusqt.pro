@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     UI/lyricdownloaderwindow.cpp \
     lyricfetcher.cpp \
     Sites/lyricsite.cpp \
-    Sites/darklyricssite.cpp
+    Sites/darklyricssite.cpp \
+    Sites/azlyricssite.cpp
 
 HEADERS  += \
     datamodel.h \
@@ -32,7 +33,8 @@ HEADERS  += \
     UI/lyricdownloaderwindow.h \
     lyricfetcher.h \
     Sites/lyricsite.h \
-    Sites/darklyricssite.h
+    Sites/darklyricssite.h \
+    Sites/azlyricssite.h
 
 INCLUDEPATH += taglib-1.11
 INCLUDEPATH += taglib-1.11/taglib

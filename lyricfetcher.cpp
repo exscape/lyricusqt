@@ -3,6 +3,7 @@
 
 LyricFetcher::LyricFetcher() {
     darkLyrics = new DarkLyricsSite;
+    AZLyrics = new AZLyricsSite;
 }
 
 void LyricFetcher::fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback) {
@@ -16,5 +17,6 @@ void LyricFetcher::fetchLyrics(const QString &artist, const QString &title, std:
     // Trim whitespace
     fixedTitle = fixedTitle.replace(QRegularExpression("^\\s+|\\s+$"), "");
 
-    darkLyrics->fetchLyrics(artist, fixedTitle, callback);
+    //darkLyrics->fetchLyrics(artist, fixedTitle, callback);
+    AZLyrics->fetchLyrics(artist, fixedTitle, callback);
 }
