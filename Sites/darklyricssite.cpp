@@ -11,14 +11,27 @@ DarkLyricsSite::DarkLyricsSite() {
 void DarkLyricsSite::fetchLyrics(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback) {
     QString simplifiedArtist = simplifiedRepresentation(artist);
     QString simplifiedTitle = simplifiedRepresentation(title);
+
+    // We use two levels of caching for DarkLyrics.
+    // The more basic one is a map between <artist, title> pairs and the URL to the lyrics page, as for the other sites.
+    // However, DarkLyrics has all the lyrics for an entire album on a single page, which means it's a waste to fetch the same page
+    // multiple times, in case we're requesting lyrics for multiple songs on a single album.
+    // We begin by looking in a cache that stores lyrics for songs that the parser has already seen, either because that song was requested previously,
+    // or because a different song from the same album was requested previously.
+    if (lyricsCache.contains({simplifiedArtist, simplifiedTitle})) {
+        // Wohoo!
+        callback(lyricsCache[{simplifiedArtist, simplifiedTitle}], FetchResult::Success);
+        return;
+    }
+
+    // OK, so the faster cache failed; let's try the second-best thing.
     if (titleURLCache.contains({simplifiedArtist, simplifiedTitle})) {
-        // Nice. That means we can set up a request for the lyrics immediately.
         QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
         qDebug() << "URL was cached!" << artist << "-" << title << "==>" << url;
         QNetworkRequest networkRequest(url);
         QNetworkReply *reply = accessManager.get(networkRequest);
         QObject::connect(reply, &QNetworkReply::finished, [=] {
-            lyricsPageResponseHandler(title, callback, reply);
+            lyricsPageResponseHandler(artist, title, callback, reply);
         });
 
         return;
@@ -89,7 +102,7 @@ void DarkLyricsSite::artistPageResponseHandler(const QString &artist, const QStr
         QNetworkRequest networkRequest(url);
         QNetworkReply *reply = accessManager.get(networkRequest);
         QObject::connect(reply, &QNetworkReply::finished, [=] {
-            lyricsPageResponseHandler(title, callback, reply);
+            lyricsPageResponseHandler(artist, title, callback, reply);
         });
 
         return;
@@ -98,7 +111,7 @@ void DarkLyricsSite::artistPageResponseHandler(const QString &artist, const QStr
     callback({}, FetchResult::NoMatch);
 }
 
-void DarkLyricsSite::lyricsPageResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
+void DarkLyricsSite::lyricsPageResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
     reply->deleteLater();
     if (reply->error()) {
         callback(QString(), FetchResult::RequestFailed); // TODO: use more specific errors
@@ -110,16 +123,23 @@ void DarkLyricsSite::lyricsPageResponseHandler(const QString &title, std::functi
     re.setPatternOptions(re.patternOptions() | QRegularExpression::CaseInsensitiveOption);
     QRegularExpressionMatchIterator matchIterator = re.globalMatch(receivedHTML, 0, QRegularExpression::NormalMatch);
 
+    // DarkLyrics stores all the lyrics for an album on a single page, so if we want to fetch all the lyrics for an album,
+    // we can use a cache to fetch them exactly once, instead of once per track.
+    // We parse the entire page on the first call, since storing the HTML would use more memory.
+    QString simplifiedArtist = simplifiedRepresentation(artist);
+    QString simplifiedTitle = simplifiedRepresentation(title);
     while (matchIterator.hasNext()) {
         QRegularExpressionMatch match = matchIterator.next();
-        QString foundTitle = match.captured(1);
+        QString foundTitle = simplifiedRepresentation(match.captured(1));
+        QString foundLyrics = match.captured(2).replace(QRegularExpression("<[^>]*>"), ""); // Remove HTML tags
+        foundLyrics = foundLyrics.replace(QRegularExpression("\\A\\s+|\\s+\\Z"), ""); // Trim whitespace from beginning and end
+        lyricsCache[{simplifiedArtist, foundTitle}] = foundLyrics;
+    }
 
-        if (simplifiedRepresentation(title) == simplifiedRepresentation(foundTitle)) {
-            QString foundLyrics = match.captured(2).replace(QRegularExpression("<[^>]*>"), ""); // Remove HTML tags
-            foundLyrics = foundLyrics.replace(QRegularExpression("\\A\\s+|\\s+\\Z"), ""); // Trim whitespace from beginning and end
-            callback(foundLyrics, FetchResult::Success);
-            return;
-        }
+    // Finally, use the cache to actually look up the lyrics we wanted to fetch in the first place.
+    if (lyricsCache.contains({simplifiedArtist, simplifiedTitle})) {
+        callback(lyricsCache[{simplifiedArtist, simplifiedTitle}], FetchResult::Success);
+        return;
     }
 
     // If we get here, something likely went wrong. We KNOW that the lyrics for this track should be on this page,

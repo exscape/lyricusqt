@@ -17,11 +17,12 @@ public:
 private:
     std::tuple<QString, FetchResult> getArtistURL(const QString &_artist) const;
     void artistPageResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
-    void lyricsPageResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
+    void lyricsPageResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
     QString siteName() override { return "DarkLyrics"; }
 
     QNetworkAccessManager accessManager;
     QHash<QPair<QString, QString>, QUrl> titleURLCache;
+    QHash<QPair<QString, QString>, QString> lyricsCache;
 };
 
 #endif // DARKLYRICSSITE_H
