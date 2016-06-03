@@ -1,4 +1,5 @@
 #include "darklyricssite.h"
+#include "shared.h"
 #include <QDebug>
 #include <QRegularExpression>
 #include <QtNetwork/QNetworkRequest>
@@ -7,10 +8,24 @@
 DarkLyricsSite::DarkLyricsSite() {
 }
 
-// TODO: Ensure that Qt handles the caching, so that the page is downloaded only once per session,
-// TODO: even if we make 10 requests for the same album.
-
 void DarkLyricsSite::fetchLyrics(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback) {
+    QString simplifiedArtist = simplifiedRepresentation(artist);
+    QString simplifiedTitle = simplifiedRepresentation(title);
+    if (titleURLCache.contains({simplifiedArtist, simplifiedTitle})) {
+        // Nice. That means we can set up a request for the lyrics immediately.
+        QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
+        qDebug() << "URL was cached!" << artist << "-" << title << "==>" << url;
+        QNetworkRequest networkRequest(url);
+        QNetworkReply *reply = accessManager.get(networkRequest);
+        QObject::connect(reply, &QNetworkReply::finished, [=] {
+            lyricsPageResponseHandler(title, callback, reply);
+        });
+
+        return;
+    }
+
+    // If we get here, the URL wasn't cached, and so we need to start at the beginning.
+
     QString artistURL;
     FetchResult result;
     std::tie(artistURL, result) = getArtistURL(artist);
@@ -24,7 +39,7 @@ void DarkLyricsSite::fetchLyrics(const QString &artist, const QString &title, st
     QNetworkRequest networkRequest((QUrl(artistURL)));
     QNetworkReply *reply = accessManager.get(networkRequest);
     QObject::connect(reply, &QNetworkReply::finished, [=] {
-        artistPageResponseHandler(title, callback, reply);
+        artistPageResponseHandler(artist, title, callback, reply);
     });
 }
 
@@ -46,7 +61,7 @@ std::tuple<QString, FetchResult> DarkLyricsSite::getArtistURL(const QString &_ar
         return std::make_tuple(QString("http://www.darklyrics.com/%1/%2.html").arg(QString(artist[0]), artist), FetchResult::Success);
 }
 
-void DarkLyricsSite::artistPageResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
+void DarkLyricsSite::artistPageResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
     reply->deleteLater();
     if (reply->error()) {
         callback(QString(), FetchResult::RequestFailed); // TODO: use more specific errors
@@ -54,34 +69,30 @@ void DarkLyricsSite::artistPageResponseHandler(const QString &title, std::functi
     }
 
     QString receivedHTML = QString(reply->readAll());
-    QRegularExpression re(R"##(<a href="../(lyrics/.*)">(.*?)</a><br />)##");
+    QRegularExpression re(R"##(<a href="../(lyrics/.*?)(?:#\d*)?">(.*?)</a><br />)##");
     QRegularExpressionMatchIterator matchIterator = re.globalMatch(receivedHTML);
 
+    QString simplifiedArtist = simplifiedRepresentation(artist);
+    QString simplifiedTitle = simplifiedRepresentation(title);
     while (matchIterator.hasNext()) {
         QRegularExpressionMatch match = matchIterator.next();
-        QString url = match.captured(1);
-        QString foundTitle = match.captured(2);
-        // If this title matches the title we were searching for, extract the URL.
-        // To improve the hit rate, we ignore apostrophes and non-English characters.
-        // This way, slightly mislabeled tracks will still match (but tracks in non-Latin alphabets
-        // will not work at all -- though I don't believe many exist on DarkLyrics!).
-        // TODO: refactor to make some shared function for all classes to use
-        QString simplifiedTitle = title.toLower().replace(QRegularExpression("[^A-Za-z0-9 ]"), "");
-        foundTitle = foundTitle.toLower().replace(QRegularExpression("[^A-Za-z0-9 ]"), "");
+        QString url = "http://www.darklyrics.com/" + match.captured(1);
+        QString foundTitle = simplifiedRepresentation(match.captured(2));
+        titleURLCache[{simplifiedArtist, foundTitle}] = QUrl(url);
+    }
 
-        if (simplifiedTitle == foundTitle) {
-            url = "http://www.darklyrics.com/" + url.replace(QRegularExpression("#\\d+$"), "");
+    if (titleURLCache.contains({simplifiedArtist, simplifiedTitle})) {
+        QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
 
-            // Okay! We have the final URL; we need to fetch it, followed by "parsing" it (with regular expressions,
-            // since that works well in practice -- no need to actually parse with a proper HTML parser).
-            QNetworkRequest networkRequest((QUrl(url)));
-            QNetworkReply *reply = accessManager.get(networkRequest);
-            QObject::connect(reply, &QNetworkReply::finished, [=] {
-                lyricsPageResponseHandler(title, callback, reply);
-            });
+        // Okay! We have the final URL; we need to fetch it, followed by "parsing" it (with regular expressions,
+        // since that works well in practice -- no need to actually parse with a proper HTML parser).
+        QNetworkRequest networkRequest(url);
+        QNetworkReply *reply = accessManager.get(networkRequest);
+        QObject::connect(reply, &QNetworkReply::finished, [=] {
+            lyricsPageResponseHandler(title, callback, reply);
+        });
 
-            return;
-        }
+        return;
     }
 
     callback({}, FetchResult::NoMatch);
@@ -103,10 +114,7 @@ void DarkLyricsSite::lyricsPageResponseHandler(const QString &title, std::functi
         QRegularExpressionMatch match = matchIterator.next();
         QString foundTitle = match.captured(1);
 
-        QString simplifiedTitle = title.toLower().replace(QRegularExpression("[^A-Za-z0-9 ]"), "");
-        foundTitle = foundTitle.toLower().replace(QRegularExpression("[^A-Za-z0-9 ]"), "");
-
-        if (simplifiedTitle == foundTitle) {
+        if (simplifiedRepresentation(title) == simplifiedRepresentation(foundTitle)) {
             QString foundLyrics = match.captured(2).replace(QRegularExpression("<[^>]*>"), ""); // Remove HTML tags
             foundLyrics = foundLyrics.replace(QRegularExpression("\\A\\s+|\\s+\\Z"), ""); // Trim whitespace from beginning and end
             callback(foundLyrics, FetchResult::Success);

@@ -5,6 +5,9 @@
 #include <functional>
 #include <tuple>
 #include <QtNetwork/QNetworkAccessManager>
+#include <QHash>
+#include <QPair>
+#include <QUrl>
 
 class AZLyricsSite : public LyricSite
 {
