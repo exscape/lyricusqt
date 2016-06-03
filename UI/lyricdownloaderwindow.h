@@ -31,11 +31,13 @@ class LyricDownloaderWindow : public QMainWindow
     
 public:
     explicit LyricDownloaderWindow(QWidget *parent = 0);
+    bool eventFilter(QObject *target, QEvent *event);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *e) override;
     void dropEvent(QDropEvent *e) override;
     void addFilesRecursively(const QString &sDir, int max_depth);
+    void addFile(const QString &file);
 };
 
 #endif // LYRICDOWNLOADERWINDOW_H

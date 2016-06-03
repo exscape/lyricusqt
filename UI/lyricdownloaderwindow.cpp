@@ -3,6 +3,8 @@
 #include <QMimeData>
 #include <QFileInfo>
 #include <QDir>
+#include <QMessageBox>
+#include <QAction>
 
 LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QMainWindow(parent) {
     fileList = new QTreeWidget;
@@ -13,9 +15,9 @@ LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QMainWindow(pare
     fileList->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     fileList->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     fileList->header()->setStretchLastSection(true);
-
-    fileList->addTopLevelItem(new QTreeWidgetItem(QStringList({"No", "C:\\Music\\Test.mp3"})));
-    fileList->model()->setHeaderData(0, Qt::Horizontal, Qt::AlignCenter, Qt::TextAlignmentRole);
+//  fileList->model()->setHeaderData(0, Qt::Horizontal, Qt::AlignCenter, Qt::TextAlignmentRole);
+    fileList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    fileList->installEventFilter(this);
 
     vbox = new QVBoxLayout;
     bottomHbox = new QHBoxLayout;
@@ -41,11 +43,16 @@ LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QMainWindow(pare
         fileDialog.setFileMode(QFileDialog::Directory);
         fileDialog.setOption(QFileDialog::ShowDirsOnly, true);
         if (fileDialog.exec()) {
+            if (fileDialog.selectedFiles().length() > 0)
+                startDownloadButton->setEnabled(true);
             // Only one directory is supposed to be selectable, but just in case...
             for (const QString &dir : fileDialog.selectedFiles()) {
                 addFilesRecursively(dir, 15);
             }
         }
+
+        if (fileList->topLevelItemCount() > 0)
+            startDownloadButton->setEnabled(true);
     });
 
     connect(addFilesButton, &QPushButton::clicked, [&] {
@@ -53,15 +60,37 @@ LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QMainWindow(pare
         fileDialog.setNameFilter("Supported files (*.mp3 *.m4a);;MP3 files (*.mp3);;M4A files (*.m4a)");
         fileDialog.setFileMode(QFileDialog::ExistingFiles);
         if (fileDialog.exec()) {
+            if (fileDialog.selectedFiles().length() > 0)
+                startDownloadButton->setEnabled(true);
             for (const QString &file : fileDialog.selectedFiles()) {
-                fileList->addTopLevelItem(new QTreeWidgetItem({"?", file}));
+                addFile(file);
             }
         }
+
+        if (fileList->topLevelItemCount() > 0)
+            startDownloadButton->setEnabled(true);
     });
 
     resize(900, 600);
 
     setAcceptDrops(true);
+}
+
+bool LyricDownloaderWindow::eventFilter(QObject *target, QEvent *event) {
+    Q_ASSERT(target == fileList);
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+        if (keyEvent->key() == Qt::Key_Delete) {
+            for (const auto &item : fileList->selectedItems()) {
+                delete item;
+            }
+
+            if (fileList->topLevelItemCount() == 0)
+                startDownloadButton->setEnabled(false);
+        }
+    }
+
+    return QMainWindow::eventFilter(target, event);
 }
 
 void LyricDownloaderWindow::dragEnterEvent(QDragEnterEvent *e) {
@@ -86,7 +115,7 @@ void LyricDownloaderWindow::dropEvent(QDropEvent *e) {
         QString local = url.toLocalFile();
         QFileInfo fileInfo(local);
         if (fileInfo.suffix() == "mp3" || fileInfo.suffix() == "m4a") {
-            fileList->addTopLevelItem(new QTreeWidgetItem({"?", local}));
+            addFile(local);
         }
         else if (fileInfo.isDir()) {
             addFilesRecursively(local, 15);
@@ -94,6 +123,13 @@ void LyricDownloaderWindow::dropEvent(QDropEvent *e) {
         else
             continue;
     }
+
+    if (fileList->topLevelItemCount() > 0)
+        startDownloadButton->setEnabled(true);
+}
+
+void LyricDownloaderWindow::addFile(const QString &file) {
+    fileList->addTopLevelItem(new QTreeWidgetItem({"?", file}));
 }
 
 void LyricDownloaderWindow::addFilesRecursively(const QString &sDir, int max_depth) {
@@ -107,7 +143,7 @@ void LyricDownloaderWindow::addFilesRecursively(const QString &sDir, int max_dep
         QString absPath = info.absoluteFilePath();
 
         if (absPath.endsWith(".mp3", Qt::CaseInsensitive)|| absPath.endsWith(".m4a", Qt::CaseInsensitive)) {
-            fileList->addTopLevelItem(new QTreeWidgetItem({"?", absPath}));
+            addFile(absPath);
         }
 
         if (max_depth > 0 && info.isDir() && !info.isSymLink()) {
