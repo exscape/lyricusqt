@@ -9,13 +9,13 @@
 #include <QPlainTextEdit>
 #include "lyricfetcher.h"
 
-class DataModel;
+class ReverseSearchModel;
 
 class LyricDownloaderWindow : public QMainWindow
 {
     Q_OBJECT
     
-    DataModel *dataModel = nullptr;
+    ReverseSearchModel *dataModel = nullptr;
     LyricFetcher *lyricFetcher = nullptr;
     QGridLayout *gridLayout = nullptr;
     QLabel *artistLabel = nullptr;
@@ -27,7 +27,7 @@ class LyricDownloaderWindow : public QMainWindow
 
     
 public:
-    explicit LyricDownloaderWindow(DataModel *model = 0, QWidget *parent = 0);
+    explicit LyricDownloaderWindow(ReverseSearchModel *model = 0, QWidget *parent = 0);
 
 signals:
 

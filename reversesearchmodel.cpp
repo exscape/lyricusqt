@@ -1,4 +1,4 @@
-#include "datamodel.h"
+#include "reversesearchmodel.h"
 #include <taglib/fileref.h>
 #include <taglib/mpeg/mpegfile.h>
 #include <taglib/mpeg/id3v2/frames/unsynchronizedlyricsframe.h>
@@ -16,7 +16,7 @@
 #include <QMessageBox>
 #include <QApplication>
 
-DataModel::DataModel() {
+ReverseSearchModel::ReverseSearchModel() {
     db = QSqlDatabase::addDatabase("QSQLITE");
     QString dbpath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir path = dbpath;
@@ -49,7 +49,7 @@ DataModel::DataModel() {
     qDebug() << "Database set up/opened successfully";
 }
 
-void DataModel::indexFilesRecursively(const QString &sDir, int max_depth) {
+void ReverseSearchModel::indexFilesRecursively(const QString &sDir, int max_depth) {
     QDir dir(sDir);
     QFileInfoList list = dir.entryInfoList(dir.nameFilters(), QDir::AllEntries | QDir::NoDotAndDotDot);
 
@@ -69,7 +69,7 @@ void DataModel::indexFilesRecursively(const QString &sDir, int max_depth) {
     }
 }
 
-void DataModel::indexFile(const QString &path) {
+void ReverseSearchModel::indexFile(const QString &path) {
     qDebug() << "Indexing" << path;
 
     QString artist, title, album;
@@ -117,7 +117,7 @@ void DataModel::indexFile(const QString &path) {
         qDebug() << "Insert successful for" << artist << "-" << title;
 }
 
-QList<Track> DataModel::tracksMatchingLyrics(const QString &partialLyrics) {
+QList<Track> ReverseSearchModel::tracksMatchingLyrics(const QString &partialLyrics) {
     QSqlQuery query;
     query.prepare("SELECT artist,title,album,lyrics FROM data WHERE lyrics LIKE :part");
     query.bindValue(":part", "%" + partialLyrics + "%");
@@ -137,7 +137,7 @@ QList<Track> DataModel::tracksMatchingLyrics(const QString &partialLyrics) {
     return results;
 }
 
-QString DataModel::lyricsForFile(const QString &path) {
+QString ReverseSearchModel::lyricsForFile(const QString &path) {
     if (path.endsWith(".mp3")) {
         TagLib::MPEG::File mpf(QFile::encodeName(path).constData());
         if (!mpf.isOpen() || !mpf.isValid())
@@ -174,7 +174,7 @@ QString DataModel::lyricsForFile(const QString &path) {
     return {};
 }
 
-bool DataModel::setLyricsForFile(const QString &path, const QString &lyrics) {
+bool ReverseSearchModel::setLyricsForFile(const QString &path, const QString &lyrics) {
     if (path.endsWith(".mp3")) {
         TagLib::MPEG::File mpf(QFile::encodeName(path).constData());
         if (!mpf.isOpen() || !mpf.isValid())
@@ -224,7 +224,7 @@ bool DataModel::setLyricsForFile(const QString &path, const QString &lyrics) {
     return false;
 }
 
-void DataModel::updateIndex() {
+void ReverseSearchModel::updateIndex() {
     QSqlQuery query("DELETE FROM data");
     id = 1;
     query.exec();

@@ -1,5 +1,5 @@
 #include "UI/reversesearchwindow.h"
-#include "datamodel.h"
+#include "reversesearchmodel.h"
 #include "track.h"
 #include <QHeaderView>
 #include <QDebug>
@@ -31,7 +31,7 @@ void ReverseSearchWindow::searchStringUpdated(QString newString) {
     results->addTopLevelItems(items);
 }
 
-ReverseSearchWindow::ReverseSearchWindow(DataModel *model, QWidget *parent) : QMainWindow(parent) {
+ReverseSearchWindow::ReverseSearchWindow(ReverseSearchModel *model, QWidget *parent) : QMainWindow(parent) {
     this->dataModel = model;
 
     QWidget *window = new QWidget;

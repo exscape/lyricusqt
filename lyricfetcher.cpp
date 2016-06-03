@@ -7,7 +7,7 @@ LyricFetcher::LyricFetcher() {
     songMeanings = new SongmeaningsSite;
 
     // TODO: create a UI to order and enable/disable sites
-   lyricSites = { darkLyrics, songMeanings, AZLyrics };
+    lyricSites = { darkLyrics, songMeanings, AZLyrics };
 }
 
 void LyricFetcher::fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback, int siteIndex) {

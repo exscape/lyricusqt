@@ -15,7 +15,6 @@ TEMPLATE = app
 LIBS += $$PWD/taglib-1.11/taglib-release/taglib.dll
 
 SOURCES += main.cpp\
-    datamodel.cpp \
     track.cpp \
     UI/reversesearchwindow.cpp \
     UI/mainwindow.cpp \
@@ -25,10 +24,10 @@ SOURCES += main.cpp\
     Sites/darklyricssite.cpp \
     Sites/azlyricssite.cpp \
     Sites/songmeaningssite.cpp \
-    shared.cpp
+    shared.cpp \
+    reversesearchmodel.cpp
 
 HEADERS  += \
-    datamodel.h \
     track.h \
     UI/reversesearchwindow.h \
     UI/mainwindow.h \
@@ -38,7 +37,8 @@ HEADERS  += \
     Sites/darklyricssite.h \
     Sites/azlyricssite.h \
     Sites/songmeaningssite.h \
-    shared.h
+    shared.h \
+    reversesearchmodel.h
 
 INCLUDEPATH += taglib-1.11
 INCLUDEPATH += taglib-1.11/taglib

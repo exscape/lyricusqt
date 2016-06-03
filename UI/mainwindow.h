@@ -7,13 +7,13 @@
 #include "UI/lyricdownloaderwindow.h"
 #include <QHBoxLayout>
 
-class DataModel;
+class ReverseSearchModel;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    DataModel *dataModel = nullptr;
+    ReverseSearchModel *reverseSearchModel = nullptr;
     QPushButton *reverseSearchButton = nullptr;
     QPushButton *lyricDownloaderButton = nullptr;
     ReverseSearchWindow *reverseSearchWindow = nullptr;

@@ -1,7 +1,7 @@
 #include "UI/lyricdownloaderwindow.h"
 #include <QMessageBox>
 
-LyricDownloaderWindow::LyricDownloaderWindow(DataModel *model, QWidget *parent) : QMainWindow(parent), dataModel(model)
+LyricDownloaderWindow::LyricDownloaderWindow(ReverseSearchModel *model, QWidget *parent) : QMainWindow(parent), dataModel(model)
 {
     lyricFetcher = new LyricFetcher;
     gridLayout = new QGridLayout;

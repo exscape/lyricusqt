@@ -1,9 +1,9 @@
 #include "UI/mainwindow.h"
 #include <QDesktopWidget>
-#include "datamodel.h"
+#include "reversesearchmodel.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-    dataModel = new DataModel;
+    reverseSearchModel = new ReverseSearchModel;
     reverseSearchButton = new QPushButton("Reverse lyric search");
     lyricDownloaderButton = new QPushButton("Lyric downloader");
     hbox = new QHBoxLayout;
@@ -12,14 +12,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     connect(reverseSearchButton, &QPushButton::clicked, [&]  {
         if (reverseSearchWindow == nullptr)
-            reverseSearchWindow = new ReverseSearchWindow(dataModel, this);
+            reverseSearchWindow = new ReverseSearchWindow(reverseSearchModel, this);
         reverseSearchWindow->show();
         reverseSearchWindow->setFocus();
     });
 
     connect(lyricDownloaderButton, &QPushButton::clicked, [&]  {
         if (lyricDownloaderWindow == nullptr)
-            lyricDownloaderWindow = new LyricDownloaderWindow(dataModel, this);
+            lyricDownloaderWindow = new LyricDownloaderWindow(reverseSearchModel, this);
         lyricDownloaderWindow->show();
         lyricDownloaderWindow->setFocus();
     });

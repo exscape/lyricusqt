@@ -10,13 +10,13 @@
 #include <QTreeWidget>
 #include <QPlainTextEdit>
 
-class DataModel;
+class ReverseSearchModel;
 
 class ReverseSearchWindow : public QMainWindow
 {
     Q_OBJECT
 
-    DataModel *dataModel = nullptr;
+    ReverseSearchModel *dataModel = nullptr;
 
     QPushButton *indexButton = nullptr;
     QVBoxLayout *vbox = nullptr;
@@ -25,7 +25,7 @@ class ReverseSearchWindow : public QMainWindow
     QPlainTextEdit *lyricDisplay = nullptr;
 
 public:
-    ReverseSearchWindow(DataModel *model, QWidget *parent);
+    ReverseSearchWindow(ReverseSearchModel *model, QWidget *parent);
     ~ReverseSearchWindow() {}
 protected:
     void searchStringUpdated(QString newString);
