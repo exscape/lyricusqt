@@ -1,4 +1,5 @@
 #include "azlyricssite.h"
+#include "shared.h"
 #include <QDebug>
 #include <QRegularExpression>
 #include <QtNetwork/QNetworkRequest>
@@ -7,10 +8,24 @@
 AZLyricsSite::AZLyricsSite() {
 }
 
-// TODO: Ensure that Qt handles the caching, so that the page is downloaded only once per session,
-// TODO: even if we make 10 requests for the same album.
-
 void AZLyricsSite::fetchLyrics(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback) {
+    QString simplifiedArtist = simplifiedRepresentation(artist);
+    QString simplifiedTitle = simplifiedRepresentation(title);
+    if (titleURLCache.contains({simplifiedArtist, simplifiedTitle})) {
+        // We had the URL cached, so we don't have to search for the artist, and all that!
+        QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
+        qDebug() << "URL was cached!" << artist << "-" << title << "==>" << url;
+        QNetworkRequest networkRequest(url);
+        networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
+        QNetworkReply *reply = accessManager.get(networkRequest);
+        QObject::connect(reply, &QNetworkReply::finished, [=] {
+            lyricsPageResponseHandler(callback, reply);
+        });
+
+        return;
+    }
+
+    // If we got here, we didn't have anything cached, and need to figure out the artist page URL first.
     // Unfortunately, unlike DarkLyrics (which appears to be affiliated with AZLyrics), AZLyrics doesn't use a simple
     // naming scheme for artist pages. "Michael Jackson" is under "/j/jackson", while Gary Moore is under "/g/garymoore",
     // and in cases where multiple artists have the same last name, it seems random which (if any!) uses that last name
@@ -46,15 +61,13 @@ void AZLyricsSite::artistSearchResponseHandler(const QString &artist, const QStr
         QRegularExpressionMatch match = matchIterator.next();
         QString url = match.captured(1);
         QString foundArtist = match.captured(2);
-        QString simplifiedArtist = artist.toLower().replace(QRegularExpression("[^A-Za-z0-9 ]"), "");
-        foundArtist = foundArtist.toLower().replace(QRegularExpression("[^A-Za-z0-9 ]"), "");
 
-        if (simplifiedArtist == foundArtist) {
+        if (simplifiedRepresentation(artist) == simplifiedRepresentation(foundArtist)) {
             QNetworkRequest networkRequest((QUrl(url)));
             networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
             QNetworkReply *reply = accessManager.get(networkRequest);
             QObject::connect(reply, &QNetworkReply::finished, [=] {
-                artistPageResponseHandler(title, callback, reply);
+                artistPageResponseHandler(artist, title, callback, reply);
             });
 
             return;
@@ -64,7 +77,7 @@ void AZLyricsSite::artistSearchResponseHandler(const QString &artist, const QStr
     callback({}, FetchResult::NoMatch);
 }
 
-void AZLyricsSite::artistPageResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
+void AZLyricsSite::artistPageResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
     reply->deleteLater();
     if (reply->error()) {
         qDebug() << "AZLyricsSite::titleResponseHandler error:" << reply->errorString();
@@ -73,31 +86,31 @@ void AZLyricsSite::artistPageResponseHandler(const QString &title, std::function
     }
 
     QString receivedHTML = QString(reply->readAll());
-    QRegularExpression re(R"##(<a href="../(lyrics/.*)" target="_blank">(.*?)</a>)##");
+    QRegularExpression re(R"##(<a href="../(lyrics/.*)(?:\\d+#)?" target="_blank">(.*?)</a>)##");
 
     QRegularExpressionMatchIterator matchIterator = re.globalMatch(receivedHTML);
 
+    QString simplifiedArtist = simplifiedRepresentation(artist);
+    QString simplifiedTitle = simplifiedRepresentation(title);
     while (matchIterator.hasNext()) {
         QRegularExpressionMatch match = matchIterator.next();
-        QString url = match.captured(1);
-        QString foundTitle = match.captured(2);
-        QString simplifiedTitle = title.toLower().replace(QRegularExpression("[^A-Za-z0-9 ]"), "");
-        foundTitle = foundTitle.toLower().replace(QRegularExpression("[^A-Za-z0-9 ]"), "");
+        QString url = "http://www.azlyrics.com/" + match.captured(1);
+        QString foundTitle = simplifiedRepresentation(match.captured(2));
+        titleURLCache[{simplifiedArtist, foundTitle}] = QUrl(url);
+    }
 
-        if (simplifiedTitle == foundTitle) {
-            url = "http://www.azlyrics.com/" + url.replace(QRegularExpression("#\\d+$"), "");
+    if (titleURLCache.contains({simplifiedArtist, simplifiedTitle})) {
+        // Okay! We have the final URL; we need to fetch it, followed by "parsing" it (with regular expressions,
+        // since that works well in practice -- no need to actually parse with a proper HTML parser).
+        QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
+        QNetworkRequest networkRequest(url);
+        networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
+        QNetworkReply *reply = accessManager.get(networkRequest);
+        QObject::connect(reply, &QNetworkReply::finished, [=] {
+            lyricsPageResponseHandler(callback, reply);
+        });
 
-            // Okay! We have the final URL; we need to fetch it, followed by "parsing" it (with regular expressions,
-            // since that works well in practice -- no need to actually parse with a proper HTML parser).
-            QNetworkRequest networkRequest((QUrl(url)));
-            networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
-            QNetworkReply *reply = accessManager.get(networkRequest);
-            QObject::connect(reply, &QNetworkReply::finished, [=] {
-                lyricsPageResponseHandler(callback, reply);
-            });
-
-            return;
-        }
+        return;
     }
 
     callback({}, FetchResult::NoMatch);
