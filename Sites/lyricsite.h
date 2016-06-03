@@ -3,15 +3,7 @@
 
 #include <QString>
 #include <functional>
-
-enum class FetchResult {
-    Success = 0,
-    InvalidRequest,
-    ConnectionFailed,
-    RequestFailed,
-    ParsingFailed,
-    NoMatch
-};
+#include "shared.h"
 
 class LyricSite
 {

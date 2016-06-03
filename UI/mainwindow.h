@@ -2,10 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QPushButton>
 #include "UI/reversesearchwindow.h"
 #include "UI/lyricdownloaderwindow.h"
-#include <QHBoxLayout>
+#include "UI/manualdownloaderwindow.h"
+#include <QMenuBar>
+#include <QPlainTextEdit>
 
 class ReverseSearchModel;
 
@@ -14,11 +15,15 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     ReverseSearchModel *reverseSearchModel = nullptr;
-    QPushButton *reverseSearchButton = nullptr;
-    QPushButton *lyricDownloaderButton = nullptr;
     ReverseSearchWindow *reverseSearchWindow = nullptr;
     LyricDownloaderWindow *lyricDownloaderWindow = nullptr;
-    QHBoxLayout *hbox = nullptr;
+    QPlainTextEdit *lyricsTextEdit = nullptr;
+    ManualDownloaderWindow *manualDownloaderWindow = nullptr;
+
+    QMenuBar *menuBar = nullptr;
+    QMenu *fileMenu = nullptr;
+    QMenu *editMenu = nullptr;
+    QMenu *lyricsMenu = nullptr;
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow() {}

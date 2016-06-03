@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     Sites/azlyricssite.cpp \
     Sites/songmeaningssite.cpp \
     shared.cpp \
-    reversesearchmodel.cpp
+    reversesearchmodel.cpp \
+    UI/manualdownloaderwindow.cpp
 
 HEADERS  += \
     track.h \
@@ -38,7 +39,8 @@ HEADERS  += \
     Sites/azlyricssite.h \
     Sites/songmeaningssite.h \
     shared.h \
-    reversesearchmodel.h
+    reversesearchmodel.h \
+    UI/manualdownloaderwindow.h
 
 INCLUDEPATH += taglib-1.11
 INCLUDEPATH += taglib-1.11/taglib
