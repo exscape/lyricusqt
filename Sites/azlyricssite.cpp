@@ -25,11 +25,11 @@ void AZLyricsSite::fetchLyrics(const QString &artist, const QString &title, std:
     networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
     QNetworkReply *reply = accessManager.get(networkRequest);
     QObject::connect(reply, &QNetworkReply::finished, [=] {
-        artistResponseHandler(artist, title, callback, reply);
+        artistSearchResponseHandler(artist, title, callback, reply);
     });
 }
 
-void AZLyricsSite::artistResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
+void AZLyricsSite::artistSearchResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
     reply->deleteLater();
     if (reply->error()) {
         qDebug() << "AZLyricsSite::artistResponseHandler error:" << reply->errorString();
@@ -54,7 +54,7 @@ void AZLyricsSite::artistResponseHandler(const QString &artist, const QString &t
             networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
             QNetworkReply *reply = accessManager.get(networkRequest);
             QObject::connect(reply, &QNetworkReply::finished, [=] {
-                titleResponseHandler(title, callback, reply);
+                artistPageResponseHandler(title, callback, reply);
             });
 
             return;
@@ -64,7 +64,7 @@ void AZLyricsSite::artistResponseHandler(const QString &artist, const QString &t
     callback({}, FetchResult::NoMatch);
 }
 
-void AZLyricsSite::titleResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
+void AZLyricsSite::artistPageResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
     reply->deleteLater();
     if (reply->error()) {
         qDebug() << "AZLyricsSite::titleResponseHandler error:" << reply->errorString();
@@ -93,7 +93,7 @@ void AZLyricsSite::titleResponseHandler(const QString &title, std::function<void
             networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
             QNetworkReply *reply = accessManager.get(networkRequest);
             QObject::connect(reply, &QNetworkReply::finished, [=] {
-                lyricsResponseHandler(callback, reply);
+                lyricsPageResponseHandler(callback, reply);
             });
 
             return;
@@ -103,7 +103,7 @@ void AZLyricsSite::titleResponseHandler(const QString &title, std::function<void
     callback({}, FetchResult::NoMatch);
 }
 
-void AZLyricsSite::lyricsResponseHandler(std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
+void AZLyricsSite::lyricsPageResponseHandler(std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
     reply->deleteLater();
     if (reply->error()) {
         callback(QString(), FetchResult::RequestFailed); // TODO: use more specific errors

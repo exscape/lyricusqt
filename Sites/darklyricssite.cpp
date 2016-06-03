@@ -24,7 +24,7 @@ void DarkLyricsSite::fetchLyrics(const QString &artist, const QString &title, st
     QNetworkRequest networkRequest((QUrl(artistURL)));
     QNetworkReply *reply = accessManager.get(networkRequest);
     QObject::connect(reply, &QNetworkReply::finished, [=] {
-        titleResponseHandler(title, callback, reply);
+        artistPageResponseHandler(title, callback, reply);
     });
 }
 
@@ -46,7 +46,7 @@ std::tuple<QString, FetchResult> DarkLyricsSite::getArtistURL(const QString &_ar
         return std::make_tuple(QString("http://www.darklyrics.com/%1/%2.html").arg(QString(artist[0]), artist), FetchResult::Success);
 }
 
-void DarkLyricsSite::titleResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
+void DarkLyricsSite::artistPageResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
     reply->deleteLater();
     if (reply->error()) {
         callback(QString(), FetchResult::RequestFailed); // TODO: use more specific errors
@@ -77,7 +77,7 @@ void DarkLyricsSite::titleResponseHandler(const QString &title, std::function<vo
             QNetworkRequest networkRequest((QUrl(url)));
             QNetworkReply *reply = accessManager.get(networkRequest);
             QObject::connect(reply, &QNetworkReply::finished, [=] {
-                lyricsResponseHandler(title, callback, reply);
+                lyricsPageResponseHandler(title, callback, reply);
             });
 
             return;
@@ -87,7 +87,7 @@ void DarkLyricsSite::titleResponseHandler(const QString &title, std::function<vo
     callback({}, FetchResult::NoMatch);
 }
 
-void DarkLyricsSite::lyricsResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
+void DarkLyricsSite::lyricsPageResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
     reply->deleteLater();
     if (reply->error()) {
         callback(QString(), FetchResult::RequestFailed); // TODO: use more specific errors

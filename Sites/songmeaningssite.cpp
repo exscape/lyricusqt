@@ -37,7 +37,7 @@ void SongmeaningsSite::artistSearchResponseHandler(const QString &artist, const 
     if (reply->url().toString().contains("/artist/view/songs/")) {
         // There was only a single hit for our search, and so the site redirected us directly to the artist page.
         // No need to parse a search results page and follow a link!
-        parseArtistPage(artist, title, callback, QString(reply->readAll()));
+        parseArtistPage(title, callback, QString(reply->readAll()));
         return;
     }
 
@@ -58,7 +58,7 @@ void SongmeaningsSite::artistSearchResponseHandler(const QString &artist, const 
             networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
             QNetworkReply *reply = accessManager.get(networkRequest);
             QObject::connect(reply, &QNetworkReply::finished, [=] {
-                artistPageResponseHandler(artist, title, callback, reply);
+                artistPageResponseHandler(title, callback, reply);
             });
 
             return;
@@ -68,7 +68,7 @@ void SongmeaningsSite::artistSearchResponseHandler(const QString &artist, const 
     callback({}, FetchResult::NoMatch);
 }
 
-void SongmeaningsSite::artistPageResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
+void SongmeaningsSite::artistPageResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
     reply->deleteLater();
     if (reply->error()) {
         qDebug() << "SongmeaningsSite::artistPageResponseHandler error:" << reply->errorString();
@@ -76,10 +76,10 @@ void SongmeaningsSite::artistPageResponseHandler(const QString &artist, const QS
         return;
     }
 
-    parseArtistPage(artist, title, callback, (reply->readAll()));
+    parseArtistPage(title, callback, (reply->readAll()));
 }
 
-void SongmeaningsSite::parseArtistPage(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, const QString &receivedHTML) {
+void SongmeaningsSite::parseArtistPage(const QString &title, std::function<void (const QString &, FetchResult)> callback, const QString &receivedHTML) {
     QRegularExpression re(R"##(<a.*?href="//songmeanings.com/(songs/view/\d+)/?"[^>]*>(.*?)</a>)##");
     QRegularExpressionMatchIterator matchIterator = re.globalMatch(receivedHTML);
 
@@ -96,7 +96,7 @@ void SongmeaningsSite::parseArtistPage(const QString &artist, const QString &tit
             networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
             QNetworkReply *reply = accessManager.get(networkRequest);
             QObject::connect(reply, &QNetworkReply::finished, [=] {
-                lyricsResponseHandler(callback, reply);
+                lyricsPageResponseHandler(callback, reply);
             });
 
             return;
@@ -106,7 +106,7 @@ void SongmeaningsSite::parseArtistPage(const QString &artist, const QString &tit
     callback({}, FetchResult::NoMatch);
 }
 
-void SongmeaningsSite::lyricsResponseHandler(std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
+void SongmeaningsSite::lyricsPageResponseHandler(std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
     reply->deleteLater();
     if (reply->error()) {
         callback(QString(), FetchResult::RequestFailed); // TODO: use more specific errors
