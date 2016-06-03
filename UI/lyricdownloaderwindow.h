@@ -2,11 +2,16 @@
 #define LYRICDOWNLOADERWINDOW_H
 
 #include <QMainWindow>
-#include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QPlainTextEdit>
+#include <QTreeWidget>
+#include <QHeaderView>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFileDialog>
 #include "lyricfetcher.h"
 
 class ReverseSearchModel;
@@ -15,23 +20,22 @@ class LyricDownloaderWindow : public QMainWindow
 {
     Q_OBJECT
     
-    ReverseSearchModel *dataModel = nullptr;
     LyricFetcher *lyricFetcher = nullptr;
-    QGridLayout *gridLayout = nullptr;
-    QLabel *artistLabel = nullptr;
-    QLabel *titleLabel = nullptr;
-    QLineEdit *artistLineEdit = nullptr;
-    QLineEdit *titleLineEdit = nullptr;
-    QPushButton *searchButton = nullptr;
-    QPlainTextEdit *lyricsTextEdit = nullptr;
+    QTreeWidget *fileList = nullptr;
+    QVBoxLayout *vbox = nullptr;
+    QHBoxLayout *bottomHbox = nullptr;
 
+    QPushButton *addFolderButton = nullptr;
+    QPushButton *addFilesButton = nullptr;
+    QPushButton *startDownloadButton = nullptr;
     
 public:
-    explicit LyricDownloaderWindow(ReverseSearchModel *model = 0, QWidget *parent = 0);
+    explicit LyricDownloaderWindow(QWidget *parent = 0);
 
-signals:
-
-public slots:
+protected:
+    void dragEnterEvent(QDragEnterEvent *e) override;
+    void dropEvent(QDropEvent *e) override;
+    void addFilesRecursively(const QString &sDir, int max_depth);
 };
 
 #endif // LYRICDOWNLOADERWINDOW_H

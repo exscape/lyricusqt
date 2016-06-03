@@ -9,6 +9,9 @@ ManualDownloaderWindow::ManualDownloaderWindow() {
     titleLineEdit = new QLineEdit;
     searchButton = new QPushButton("Search");
 
+    // Remove the "?" button next to the close button
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     setLayout(gridLayout);
 
     resize(QSize(250, 90));

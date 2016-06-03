@@ -34,9 +34,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         manualDownloaderWindow->exec();
     });
 
-    lyricsMenu->addAction("&Batch downloader", this, [&] {
+    lyricsMenu->addAction("&Lyric downloader", this, [&] {
         if (lyricDownloaderWindow == nullptr)
-            lyricDownloaderWindow = new LyricDownloaderWindow(reverseSearchModel, this);
+            lyricDownloaderWindow = new LyricDownloaderWindow(this);
         lyricDownloaderWindow->show();
         lyricDownloaderWindow->setFocus();
     });
