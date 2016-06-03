@@ -16,6 +16,7 @@ private:
     void artistResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
     void titleResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
     void lyricsResponseHandler(std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
+    QString siteName() override { return "AZLyrics"; }
 
     QNetworkAccessManager accessManager;
 };

@@ -26,8 +26,8 @@ LyricDownloaderWindow::LyricDownloaderWindow(DataModel *model, QWidget *parent) 
     gridLayout->addWidget(searchButton, 2, 1, 1, 1);
     gridLayout->addWidget(lyricsTextEdit, 3, 1, 10, 1);
 
-    connect(searchButton, &QPushButton::clicked, [&] {
-        lyricFetcher->fetchLyrics(artistLineEdit->text(), titleLineEdit->text(), [&](const QString &lyrics, FetchResult result) {
+    connect(searchButton, &QPushButton::clicked, [=] {
+        lyricFetcher->fetchLyrics(artistLineEdit->text(), titleLineEdit->text(), [=](const QString &lyrics, FetchResult result) {
             if (result == FetchResult::Success)
                 lyricsTextEdit->setPlainText(lyrics);
             else if (result == FetchResult::NoMatch)

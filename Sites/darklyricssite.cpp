@@ -11,7 +11,6 @@ DarkLyricsSite::DarkLyricsSite() {
 // TODO: even if we make 10 requests for the same album.
 
 void DarkLyricsSite::fetchLyrics(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback) {
-    qWarning() << artist << "-" << title;
     QString artistURL;
     FetchResult result;
     std::tie(artistURL, result) = getArtistURL(artist);

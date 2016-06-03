@@ -15,6 +15,7 @@ private:
     std::tuple<QString, FetchResult> getArtistURL(const QString &_artist) const;
     void titleResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
     void lyricsResponseHandler(const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
+    QString siteName() override { return "DarkLyrics"; }
 
     QNetworkAccessManager accessManager;
 };
