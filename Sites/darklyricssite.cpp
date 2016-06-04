@@ -77,7 +77,14 @@ std::tuple<QString, FetchResult> DarkLyricsSite::getArtistURL(const QString &_ar
 void DarkLyricsSite::artistPageResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {
     reply->deleteLater();
     if (reply->error()) {
-        callback(QString(), FetchResult::RequestFailed); // TODO: use more specific errors
+        if (reply->error() == QNetworkReply::ContentNotFoundError) {
+            // We didn't ask anyone if this artist existed at DarkLyrics -- we assumed. If it didn't, that's not really an error that
+            // we should show in red to the user, so we return no match instead.
+            callback(QString(), FetchResult::NoMatch);
+        }
+        else
+            callback(QString(), FetchResult::RequestFailed); // TODO: use more specific errors
+
         return;
     }
 
