@@ -26,13 +26,13 @@ SOURCES += main.cpp\
     Sites/songmeaningssite.cpp \
     shared.cpp \
     reversesearchmodel.cpp \
-    UI/manualdownloaderwindow.cpp
+    UI/manualdownloaderwindow.cpp \
+    lyricdownloaderworker.cpp
 
 HEADERS  += \
     track.h \
     UI/reversesearchwindow.h \
     UI/mainwindow.h \
-    UI/lyricdownloaderwindow.h \
     lyricfetcher.h \
     Sites/lyricsite.h \
     Sites/darklyricssite.h \
@@ -40,7 +40,9 @@ HEADERS  += \
     Sites/songmeaningssite.h \
     shared.h \
     reversesearchmodel.h \
-    UI/manualdownloaderwindow.h
+    UI/manualdownloaderwindow.h \
+    UI/lyricdownloaderwindow.h \
+    lyricdownloaderworker.h
 
 INCLUDEPATH += taglib-1.11
 INCLUDEPATH += taglib-1.11/taglib

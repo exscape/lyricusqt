@@ -18,8 +18,6 @@ public:
 
 private:
     int id = 1;
-    QString lyricsForFile(const QString &path);
-    bool setLyricsForFile(const QString &path, const QString &lyrics);
     QSqlDatabase db;
 };
 

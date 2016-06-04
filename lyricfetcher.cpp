@@ -1,7 +1,7 @@
 #include "lyricfetcher.h"
 #include <QRegularExpression>
 
-LyricFetcher::LyricFetcher() {
+LyricFetcher::LyricFetcher(QObject *parent) : QObject(parent) {
     darkLyrics = new DarkLyricsSite;
     AZLyrics = new AZLyricsSite;
     songMeanings = new SongmeaningsSite;
@@ -12,17 +12,6 @@ LyricFetcher::LyricFetcher() {
 
 void LyricFetcher::fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback, int siteIndex) {
     Q_ASSERT(siteIndex < lyricSites.length());
-
-    // Ignore "(live)", "(live at ...)" and similar comments that aren't really part of the track name
-    // TODO: these leave a lot of similar stuff behind
-    QString fixedTitle = title;
-    fixedTitle = fixedTitle.replace(QRegularExpression("\\(live.*", QRegularExpression::CaseInsensitiveOption), "");
-    fixedTitle = fixedTitle.replace(QRegularExpression("\\(demo.*", QRegularExpression::CaseInsensitiveOption), "");
-    fixedTitle = fixedTitle.replace(QRegularExpression("\\(bonus.*", QRegularExpression::CaseInsensitiveOption), "");
-    fixedTitle = fixedTitle.replace(QRegularExpression("\\(.*? version\\)", QRegularExpression::CaseInsensitiveOption), "");
-
-    // Trim whitespace
-    fixedTitle = fixedTitle.replace(QRegularExpression("^\\s+|\\s+$"), "");
 
     qDebug() << "LyricFetcher: trying site #" << siteIndex << QString("(%1)").arg(lyricSites[siteIndex]->siteName());
     LyricSite *site = lyricSites[siteIndex];
@@ -46,5 +35,23 @@ void LyricFetcher::fetchLyrics(const QString &artist, const QString &title, std:
 
 void LyricFetcher::fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback) {
     qDebug() << "LyricFetcher: got request for" << artist << "-" << title;
-    return fetchLyrics(artist, title, callback, 0);
+
+    // Ignore "(live)", "(live at ...)" and similar comments that aren't really part of the track name
+    // TODO: these leave a lot of similar stuff behind
+    QString fixedTitle = title;
+    fixedTitle = fixedTitle.replace(QRegularExpression("\\(live.*", QRegularExpression::CaseInsensitiveOption), "");
+    fixedTitle = fixedTitle.replace(QRegularExpression("\\(demo.*", QRegularExpression::CaseInsensitiveOption), "");
+    fixedTitle = fixedTitle.replace(QRegularExpression("\\(bonus.*", QRegularExpression::CaseInsensitiveOption), "");
+    fixedTitle = fixedTitle.replace(QRegularExpression("\\(.*? version\\)", QRegularExpression::CaseInsensitiveOption), "");
+
+    // Trim whitespace
+    fixedTitle = fixedTitle.replace(QRegularExpression("^\\s+|\\s+$"), "");
+    return fetchLyrics(artist, fixedTitle, callback, 0);
+}
+
+void LyricFetcher::fetchLyrics(const QString &artist, const QString &title) {
+    fetchLyrics(artist, title, [=](QString lyrics, FetchResult result) {
+        qDebug() << "!!! LyricFetcher::fetchLyrics wrapper callback called for" << artist << "-" << title;
+        emit fetchFinished(lyrics, result);
+    });
 }

@@ -12,7 +12,10 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFileDialog>
-#include "lyricfetcher.h"
+#include <QCheckBox>
+#include <QProgressBar>
+#include <QThread>
+#include "lyricdownloaderworker.h"
 
 class ReverseSearchModel;
 
@@ -20,19 +23,24 @@ class LyricDownloaderWindow : public QMainWindow
 {
     Q_OBJECT
     
-    LyricFetcher *lyricFetcher = nullptr;
     QTreeWidget *fileList = nullptr;
     QVBoxLayout *vbox = nullptr;
     QHBoxLayout *bottomHbox = nullptr;
 
+    QProgressBar *progressBar = nullptr;
+    QCheckBox *overwriteLyricsCheckBox = nullptr;
     QPushButton *addFolderButton = nullptr;
     QPushButton *addFilesButton = nullptr;
     QPushButton *startDownloadButton = nullptr;
+
+    LyricDownloaderWorker *worker = nullptr;
+    QThread *workerThread = nullptr;
     
 public:
     explicit LyricDownloaderWindow(QWidget *parent = 0);
     bool eventFilter(QObject *target, QEvent *event);
 
+    void progressUpdate(int index, LyricStatus status);
 protected:
     void dragEnterEvent(QDragEnterEvent *e) override;
     void dropEvent(QDropEvent *e) override;

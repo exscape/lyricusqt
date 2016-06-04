@@ -4,6 +4,7 @@
 #include "reversesearchmodel.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+    qRegisterMetaType<FetchResult>("FetchResult");
 
     // Create a new menu bar, with a null parent -- in order to have
     // the same menu bar for all windows on OS X

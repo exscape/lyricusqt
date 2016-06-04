@@ -8,10 +8,12 @@
 #include <QList>
 #include <functional>
 
-class LyricFetcher
+class LyricFetcher : public QObject
 {
+    Q_OBJECT
+
 public:
-    LyricFetcher();
+    LyricFetcher(QObject *parent = nullptr);
     void fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback);
 private:
     void fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback, int siteIndex);
@@ -20,6 +22,12 @@ private:
     SongmeaningsSite *songMeanings = nullptr;
 
     QList<LyricSite*> lyricSites;
+
+signals:
+    void fetchFinished(QString lyrics, FetchResult result);
+
+public slots:
+    void fetchLyrics(const QString &artist, const QString &title);
 };
 
 #endif // LYRICFETCHER_H
