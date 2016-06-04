@@ -42,6 +42,7 @@ public:
 
     void progressUpdate(int index, LyricStatus status);
 protected:
+    void startButtonClicked();
     void dragEnterEvent(QDragEnterEvent *e) override;
     void dropEvent(QDropEvent *e) override;
     void addFilesRecursively(const QString &sDir, int max_depth);

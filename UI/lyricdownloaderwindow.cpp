@@ -81,62 +81,105 @@ LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QMainWindow(pare
             startDownloadButton->setEnabled(true);
     });
 
-    connect(startDownloadButton, &QPushButton::clicked, [=] {
-        startDownloadButton->setEnabled(false);
-        if (workerThread) {
-            Q_ASSERT(!workerThread->isRunning());
-            delete workerThread;
-        }
-        if (worker)
-            delete worker;
-
-        QList<QString> filesToProcess;
-        for (int i = 0; i < fileList->topLevelItemCount(); i++) {
-            filesToProcess.append(fileList->topLevelItem(i)->data(1, Qt::DisplayRole).toString());
-        }
-
-        progressBar->setValue(0);
-        progressBar->setMaximum(filesToProcess.length());
-        progressBar->setTextVisible(true);
-
-        worker = new LyricDownloaderWorker(filesToProcess); // Copy the data to the worker
-        workerThread = new QThread;
-        worker->moveToThread(workerThread);
-
-        connect(workerThread, &QThread::started, worker, &LyricDownloaderWorker::process);
-        connect(worker, &LyricDownloaderWorker::finished, workerThread, &QThread::quit);
-
-//      connect(worker, &LyricDownloaderWorker::finished, worker, &QObject::deleteLater);
-//      connect(workerThread, &QThread::finished, workerThread, &QObject::deleteLater);
-
-        connect(worker, &LyricDownloaderWorker::updateProgress, this, &LyricDownloaderWindow::progressUpdate);
-        connect(worker, &LyricDownloaderWorker::finished, this, [this] {
-            progressBar->setValue(0);
-            progressBar->setTextVisible(false);
-        }, Qt::QueuedConnection);
-
-        workerThread->start();
-    });
+    connect(startDownloadButton, &QPushButton::clicked, this, &LyricDownloaderWindow::startButtonClicked);
 
     resize(900, 600);
 
     setAcceptDrops(true);
 }
 
+void LyricDownloaderWindow::startButtonClicked() {
+    if (workerThread) {
+        Q_ASSERT(!workerThread->isRunning());
+        delete workerThread;
+        workerThread = nullptr;
+    }
+    if (worker) {
+        delete worker;
+        worker = nullptr;
+    }
+
+    // <index, path> -- this is used because the index into filesToProcess may not equal the index of the fileList.
+    // They only match if every track is NotProcessed, so this would fail if a previous operation had been aborted
+    // and then resumed.
+    // The worker needs to know the index into the fileList (for status updates), so we include it here.
+    QList<QPair<int, QString>> filesToProcess;
+    for (int i = 0; i < fileList->topLevelItemCount(); i++) {
+        auto *item = fileList->topLevelItem(i);
+        LyricStatus status = item->data(0, Qt::UserRole).value<LyricStatus>();
+        if (status == LyricStatus::NotProcessed)
+            filesToProcess.append({ i, item->data(1, Qt::DisplayRole).toString() });
+    }
+
+    if (filesToProcess.length() == 0) {
+        QMessageBox::information(this, "Done", "Nothing to do -- all tracks are already processed!", QMessageBox::Ok);
+        return;
+    }
+
+    progressBar->setValue(0);
+    progressBar->setMaximum(filesToProcess.length());
+    progressBar->setTextVisible(true);
+
+    worker = new LyricDownloaderWorker(filesToProcess, overwriteLyricsCheckBox->isChecked()); // Copy the data to the worker
+    workerThread = new QThread;
+    worker->moveToThread(workerThread);
+
+    connect(workerThread, &QThread::started, worker, &LyricDownloaderWorker::process);
+    connect(worker, &LyricDownloaderWorker::finished, workerThread, &QThread::quit);
+
+    connect(worker, &LyricDownloaderWorker::updateProgress, this, &LyricDownloaderWindow::progressUpdate);
+    connect(worker, &LyricDownloaderWorker::finished, this, [this] {
+        progressBar->setValue(0);
+        progressBar->setTextVisible(false);
+
+        disconnect(startDownloadButton, &QPushButton::clicked, 0, 0);
+        connect(startDownloadButton, &QPushButton::clicked, this, &LyricDownloaderWindow::startButtonClicked);
+        startDownloadButton->setText("Start download");
+        startDownloadButton->setEnabled(true);
+    }, Qt::QueuedConnection);
+
+    fileList->topLevelItem(0)->setBackgroundColor(0, QColor(133, 137, 255)); // Highlight the current item in blue
+
+    workerThread->start();
+
+    connect(worker, &LyricDownloaderWorker::aborted, this, [this](int lastProcessedIndex) {
+        auto *item = fileList->topLevelItem(lastProcessedIndex + 1);
+        if (item)
+            item->setBackgroundColor(0, QColor(Qt::red));
+    }, Qt::QueuedConnection);
+
+    disconnect(startDownloadButton, &QPushButton::clicked, 0, 0);
+    connect(startDownloadButton, &QPushButton::clicked, worker, &LyricDownloaderWorker::abort);
+    startDownloadButton->setText("Stop download");
+    startDownloadButton->setEnabled(true);
+}
+
 void LyricDownloaderWindow::progressUpdate(int index, LyricStatus status) {
     Q_ASSERT(index < fileList->topLevelItemCount());
+    auto *item = fileList->topLevelItem(index);
+
+    item->setData(0, Qt::UserRole, qVariantFromValue(status));
+
     if (status == LyricStatus::DownloadFailed) {
-        fileList->topLevelItem(index)->setBackgroundColor(0, QColor(Qt::red));
-        fileList->topLevelItem(index)->setData(0, Qt::DisplayRole, "Error");
+        item->setBackgroundColor(0, QColor(Qt::red));
+        item->setData(0, Qt::DisplayRole, "Error");
     }
     else if (status == LyricStatus::NoLyricsFound) {
-        fileList->topLevelItem(index)->setBackgroundColor(0, QColor(Qt::yellow));
-        fileList->topLevelItem(index)->setData(0, Qt::DisplayRole, "No");
+        item->setBackgroundColor(0, QColor(Qt::yellow));
+        item->setData(0, Qt::DisplayRole, "No");
     }
     else if (status == LyricStatus::HadLyrics || status == LyricStatus::LyricsDownloaded) {
-        fileList->topLevelItem(index)->setBackground(0, QColor(Qt::green));
-        fileList->topLevelItem(index)->setData(0, Qt::DisplayRole, "Yes");
+        item->setBackground(0, QColor(Qt::green));
+        item->setData(0, Qt::DisplayRole, "Yes");
     }
+
+    auto *nextItem = fileList->topLevelItem(index + 1);
+    if (nextItem) {
+        nextItem->setBackgroundColor(0, QColor(133, 137, 255)); // Highlight the current item in blue
+        fileList->scrollToItem(nextItem);
+    }
+    else
+        fileList->scrollToItem(item);
 
     progressBar->setValue(index + 1);
 }
@@ -159,7 +202,8 @@ bool LyricDownloaderWindow::eventFilter(QObject *target, QEvent *event) {
 }
 
 void LyricDownloaderWindow::dragEnterEvent(QDragEnterEvent *e) {
-    // TODO: Don't accept drags when the worker is active!
+    if (workerThread && workerThread->isRunning())
+        return;
 
     // If at least one of the files dragged inside is an MP3 file, an M4A file, or a folder, accept the drop.
     // If not, deny it.
@@ -196,7 +240,9 @@ void LyricDownloaderWindow::dropEvent(QDropEvent *e) {
 }
 
 void LyricDownloaderWindow::addFile(const QString &file) {
-    fileList->addTopLevelItem(new QTreeWidgetItem({"?", file}));
+    auto *item = new QTreeWidgetItem({"?", file});
+    item->setData(0, Qt::UserRole, qVariantFromValue(LyricStatus::NotProcessed));
+    fileList->addTopLevelItem(item);
 }
 
 void LyricDownloaderWindow::addFilesRecursively(const QString &sDir, int max_depth) {
