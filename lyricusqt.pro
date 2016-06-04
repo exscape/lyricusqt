@@ -12,7 +12,15 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = lyricusqt
 TEMPLATE = app
 
-LIBS += $$PWD/taglib-1.11/taglib-release/taglib.dll
+win32 {
+    LIBS += $$PWD/taglib-1.11/taglib-release/taglib.dll
+}
+
+unix {
+    CONFIG += link_pkgconfig
+    PKGCONFIG += taglib
+    CONFIG += console # fix qDebug output
+}
 
 SOURCES += main.cpp\
     track.cpp \

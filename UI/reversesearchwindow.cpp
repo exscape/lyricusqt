@@ -3,7 +3,7 @@
 #include "track.h"
 #include <QHeaderView>
 #include <QDebug>
-#include <QScrollbar>
+#include <QScrollBar>
 #include <QPalette>
 #include <QTextCursor>
 #include <QTextCharFormat>
