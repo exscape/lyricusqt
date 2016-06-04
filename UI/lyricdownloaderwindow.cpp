@@ -136,6 +136,10 @@ void LyricDownloaderWindow::startButtonClicked() {
         connect(startDownloadButton, &QPushButton::clicked, this, &LyricDownloaderWindow::startButtonClicked);
         startDownloadButton->setText("Start download");
         startDownloadButton->setEnabled(true);
+
+        addFilesButton->setEnabled(true);
+        addFolderButton->setEnabled(true);
+        overwriteLyricsCheckBox->setEnabled(true);
     }, Qt::QueuedConnection);
 
     fileList->topLevelItem(0)->setBackgroundColor(0, QColor(133, 137, 255)); // Highlight the current item in blue
@@ -152,6 +156,10 @@ void LyricDownloaderWindow::startButtonClicked() {
     connect(startDownloadButton, &QPushButton::clicked, worker, &LyricDownloaderWorker::abort);
     startDownloadButton->setText("Stop download");
     startDownloadButton->setEnabled(true);
+
+    addFilesButton->setEnabled(false);
+    addFolderButton->setEnabled(false);
+    overwriteLyricsCheckBox->setEnabled(false);
 }
 
 void LyricDownloaderWindow::progressUpdate(int index, LyricStatus status) {
@@ -188,7 +196,7 @@ bool LyricDownloaderWindow::eventFilter(QObject *target, QEvent *event) {
     Q_ASSERT(target == fileList);
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
-        if (keyEvent->key() == Qt::Key_Delete) {
+        if (keyEvent->key() == Qt::Key_Delete && (workerThread == nullptr || !workerThread->isRunning())) {
             for (const auto &item : fileList->selectedItems()) {
                 delete item;
             }
