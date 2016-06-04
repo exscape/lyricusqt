@@ -189,7 +189,7 @@ void LyricDownloaderWindow::progressUpdate(int index, LyricStatus status) {
     else
         fileList->scrollToItem(item);
 
-    progressBar->setValue(index + 1);
+    progressBar->setValue(progressBar->value() + 1);
 }
 
 bool LyricDownloaderWindow::eventFilter(QObject *target, QEvent *event) {
