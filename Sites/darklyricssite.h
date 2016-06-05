@@ -23,6 +23,7 @@ private:
     QNetworkAccessManager accessManager;
     QHash<QPair<QString, QString>, QUrl> titleURLCache;
     QHash<QPair<QString, QString>, QString> lyricsCache;
+    QList<QString> nonExistentArtistCache;
 };
 
 #endif // DARKLYRICSSITE_H

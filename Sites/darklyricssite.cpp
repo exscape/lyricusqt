@@ -12,6 +12,13 @@ void DarkLyricsSite::fetchLyrics(const QString &artist, const QString &title, st
     QString simplifiedArtist = simplifiedRepresentation(artist);
     QString simplifiedTitle = simplifiedRepresentation(title);
 
+    if (nonExistentArtistCache.contains(simplifiedArtist)) {
+        // We need to check this, so that we don't request the same page dozens or even hundreds of times,
+        // only to get a HTTP 404 every single time.
+        callback({}, FetchResult::NoMatch);
+        return;
+    }
+
     // We use two levels of caching for DarkLyrics.
     // The more basic one is a map between <artist, title> pairs and the URL to the lyrics page, as for the other sites.
     // However, DarkLyrics has all the lyrics for an entire album on a single page, which means it's a waste to fetch the same page
@@ -80,6 +87,7 @@ void DarkLyricsSite::artistPageResponseHandler(const QString &artist, const QStr
         if (reply->error() == QNetworkReply::ContentNotFoundError) {
             // We didn't ask anyone if this artist existed at DarkLyrics -- we assumed. If it didn't, that's not really an error that
             // we should show in red to the user, so we return no match instead.
+            nonExistentArtistCache.append(simplifiedRepresentation(artist));
             callback(QString(), FetchResult::NoMatch);
         }
         else

@@ -25,6 +25,7 @@ private:
 
     QNetworkAccessManager accessManager;
     QHash<QPair<QString, QString>, QUrl> titleURLCache;
+    QList<QString> nonExistentArtistCache;
 };
 
 #endif // SONGMEANINGSSITE_H

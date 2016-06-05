@@ -11,6 +11,14 @@ AZLyricsSite::AZLyricsSite() {
 void AZLyricsSite::fetchLyrics(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback) {
     QString simplifiedArtist = simplifiedRepresentation(artist);
     QString simplifiedTitle = simplifiedRepresentation(title);
+
+    if (nonExistentArtistCache.contains(simplifiedArtist)) {
+        // We need to check this, so that we don't request the same page dozens or even hundreds of times,
+        // getting a 404/no result every single time.
+        callback({}, FetchResult::NoMatch);
+        return;
+    }
+
     if (titleURLCache.contains({simplifiedArtist, simplifiedTitle})) {
         // We had the URL cached, so we don't have to search for the artist, and all that!
         QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
@@ -74,6 +82,7 @@ void AZLyricsSite::artistSearchResponseHandler(const QString &artist, const QStr
         }
     }
 
+    nonExistentArtistCache.append(simplifiedRepresentation(artist));
     callback({}, FetchResult::NoMatch);
 }
 

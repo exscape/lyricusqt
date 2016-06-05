@@ -13,6 +13,12 @@ void SongmeaningsSite::fetchLyrics(const QString &artist, const QString &title, 
     // If we do, we can skip one or even two HTTP requests (search results for an artist, and the artist page itself)!
     QString simplifiedArtist = simplifiedRepresentation(artist);
     QString simplifiedTitle = simplifiedRepresentation(title);
+
+    if (nonExistentArtistCache.contains(simplifiedArtist)) {
+        callback({}, FetchResult::NoMatch);
+        return;
+    }
+
     if (titleURLCache.contains({simplifiedArtist, simplifiedTitle})) {
         // Nice. That means we can set up a request for the lyrics, instead of searching for the artist.
         QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
@@ -77,6 +83,7 @@ void SongmeaningsSite::artistSearchResponseHandler(const QString &artist, const 
         }
     }
 
+    nonExistentArtistCache.append(simplifiedRepresentation(artist));
     callback({}, FetchResult::NoMatch);
 }
 
