@@ -6,6 +6,7 @@
 #include <Sites/songmeaningssite.h>
 #include <QString>
 #include <QList>
+#include <QHash>
 #include <functional>
 
 class LyricFetcher : public QObject
@@ -22,6 +23,7 @@ private:
     SongmeaningsSite *songMeanings = nullptr;
 
     QList<LyricSite*> lyricSites;
+    QHash<QString, LyricSite*> lyricSitesHash;
 
 signals:
     void fetchFinished(QString lyrics, FetchResult result);

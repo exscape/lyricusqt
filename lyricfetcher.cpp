@@ -1,13 +1,17 @@
 #include "lyricfetcher.h"
+#include "application.h"
 #include <QRegularExpression>
+#include <QVector>
+#include <QPair>
 
 LyricFetcher::LyricFetcher(QObject *parent) : QObject(parent) {
     darkLyrics = new DarkLyricsSite;
     AZLyrics = new AZLyricsSite;
     songMeanings = new SongmeaningsSite;
 
-    // TODO: create a UI to order and enable/disable sites
-    lyricSites = { darkLyrics, songMeanings, AZLyrics };
+    lyricSitesHash["DarkLyrics"] = darkLyrics;
+    lyricSitesHash["AZLyrics"] = AZLyrics;
+    lyricSitesHash["Songmeanings"] = songMeanings;
 }
 
 void LyricFetcher::fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback, int siteIndex) {
@@ -17,24 +21,35 @@ void LyricFetcher::fetchLyrics(const QString &artist, const QString &title, std:
     LyricSite *site = lyricSites[siteIndex];
     site->fetchLyrics(artist, title, [=](const QString &lyrics, FetchResult result) {
         if (result == FetchResult::Success) {
-            qDebug() << "LyricFetcher: site #" << siteIndex << "gave an answer, returning the result!";
+//          qDebug() << "LyricFetcher: site #" << siteIndex << "gave an answer, returning the result!";
             callback(lyrics, result);
         }
         else if (siteIndex + 1 < lyricSites.length()) {
             // There are other sites to try!
-            qDebug() << "LyricFetcher: site #" << siteIndex << "didn't give a useful reply, trying the next site";
+//          qDebug() << "LyricFetcher: site #" << siteIndex << "didn't give a useful reply, trying the next site";
             fetchLyrics(artist, title, callback, siteIndex + 1);
         }
         else {
             // Time to give up.
-            qDebug() << "LyricFetcher: no site gave a useful reply, giving up!";
+//          qDebug() << "LyricFetcher: no site gave a useful reply, giving up!";
             callback({}, result);
         }
     });
 }
 
 void LyricFetcher::fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback) {
-    qDebug() << "LyricFetcher: got request for" << artist << "-" << title;
+    // Set up the list of sites to use.
+    // It's a bit wasteful to do this here, but we can't do it in the constructor, since that's basically called once per application start.
+    // That would mean that settings would only take effect after an application restart.
+    lyricSites.clear();
+
+    auto sites = Application::getSetting("sitePriority").value<QVector<QPair<bool, QString>>>();
+    for (const QPair<bool, QString> site : sites) {
+        if (site.first && lyricSitesHash.contains(site.second)) {
+            // If this site is enabled, add it to the list of sites to use.
+            lyricSites.append(lyricSitesHash[site.second]);
+        }
+    }
 
     // Ignore "(live)", "(live at ...)" and similar comments that aren't really part of the track name
     // TODO: these leave a lot of similar stuff behind
@@ -51,7 +66,7 @@ void LyricFetcher::fetchLyrics(const QString &artist, const QString &title, std:
 
 void LyricFetcher::fetchLyrics(const QString &artist, const QString &title) {
     fetchLyrics(artist, title, [=](QString lyrics, FetchResult result) {
-        qDebug() << "!!! LyricFetcher::fetchLyrics wrapper callback called for" << artist << "-" << title;
+//      qDebug() << "!!! LyricFetcher::fetchLyrics wrapper callback called for" << artist << "-" << title;
         emit fetchFinished(lyrics, result);
     });
 }

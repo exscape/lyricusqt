@@ -17,6 +17,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     menuBar->addMenu(lyricsMenu);
     this->setMenuBar(menuBar);
 
+    fileMenu->addAction("&Preferences", this, [&] {
+        if (configDialog == nullptr) {
+            configDialog = new ConfigDialog(this);
+            configDialog->setModal(true);
+        }
+
+        configDialog->loadSettings();
+        configDialog->exec();
+    });
     fileMenu->addAction("&Save", this, [&] { qDebug() << "Save"; }, QKeySequence::Save);
     fileMenu->addSeparator();
     fileMenu->addAction("E&xit", this, [&] { QApplication::quit(); }, QKeySequence::Quit);

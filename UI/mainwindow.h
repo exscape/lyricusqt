@@ -5,6 +5,7 @@
 #include "UI/reversesearchwindow.h"
 #include "UI/lyricdownloaderwindow.h"
 #include "UI/manualdownloaderwindow.h"
+#include "UI/configdialog.h"
 #include <QMenuBar>
 #include <QPlainTextEdit>
 
@@ -19,6 +20,7 @@ class MainWindow : public QMainWindow
     LyricDownloaderWindow *lyricDownloaderWindow = nullptr;
     QPlainTextEdit *lyricsTextEdit = nullptr;
     ManualDownloaderWindow *manualDownloaderWindow = nullptr;
+    ConfigDialog *configDialog = nullptr;
 
     QMenuBar *menuBar = nullptr;
     QMenu *fileMenu = nullptr;

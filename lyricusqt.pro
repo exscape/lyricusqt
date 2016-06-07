@@ -35,7 +35,9 @@ SOURCES += main.cpp\
     shared.cpp \
     reversesearchmodel.cpp \
     UI/manualdownloaderwindow.cpp \
-    lyricdownloaderworker.cpp
+    lyricdownloaderworker.cpp \
+    UI/configdialog.cpp \
+    application.cpp
 
 HEADERS  += \
     track.h \
@@ -50,7 +52,9 @@ HEADERS  += \
     reversesearchmodel.h \
     UI/manualdownloaderwindow.h \
     UI/lyricdownloaderwindow.h \
-    lyricdownloaderworker.h
+    lyricdownloaderworker.h \
+    UI/configdialog.h \
+    application.h
 
 INCLUDEPATH += taglib-1.11
 INCLUDEPATH += taglib-1.11/taglib
