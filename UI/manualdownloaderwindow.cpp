@@ -24,6 +24,7 @@ ManualDownloaderWindow::ManualDownloaderWindow() {
     gridLayout->addWidget(searchButton, 2, 1, 1, 1);
 
     connect(searchButton, &QPushButton::clicked, [=] {
+        emit fetchStarted(artistLineEdit->text(), titleLineEdit->text());
         lyricFetcher->fetchLyrics(artistLineEdit->text(), titleLineEdit->text(), [=](const QString &lyrics, FetchResult result) {
             if (result == FetchResult::Success)
                 emit fetchComplete(lyrics, result);
@@ -37,4 +38,15 @@ ManualDownloaderWindow::ManualDownloaderWindow() {
                 emit fetchComplete("An error occured.", result);
         });
     });
+
+    searchButton->setEnabled(false);
+    connect(artistLineEdit, &QLineEdit::textEdited, this, &ManualDownloaderWindow::validateFields);
+    connect(titleLineEdit, &QLineEdit::textEdited, this, &ManualDownloaderWindow::validateFields);
+}
+
+void ManualDownloaderWindow::validateFields() {
+    if (artistLineEdit->text().length() > 0 && titleLineEdit->text().length() > 0)
+        searchButton->setEnabled(true);
+    else
+        searchButton->setEnabled(false);
 }

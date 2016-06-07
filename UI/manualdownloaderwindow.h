@@ -25,7 +25,11 @@ public:
     ManualDownloaderWindow();
 
 signals:
+    void fetchStarted(QString artist, QString title);
     void fetchComplete(QString lyrics, FetchResult result);
+
+protected:
+    void validateFields();
 };
 
 #endif // MANUALDOWNLOADERWINDOW_H

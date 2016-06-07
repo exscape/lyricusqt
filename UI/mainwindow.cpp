@@ -26,10 +26,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
             manualDownloaderWindow = new ManualDownloaderWindow;
         manualDownloaderWindow->setModal(true);
 
+        connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchStarted, [this](QString artist, QString title) {
+            lyricsTextEdit->setPlainText(QString("Attempting to fetch lyrics for %1 - %2, please wait...").arg(artist, title));
+            manualDownloaderWindow->close();
+        });
+
         connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchComplete, [this](QString lyrics, FetchResult result) {
             // No need to check for errors, as "lyrics" contains an error message in that case -- which we want to display.
             lyricsTextEdit->setPlainText(lyrics);
-            manualDownloaderWindow->close();
+            Q_UNUSED(result);
         });
 
         manualDownloaderWindow->exec();
