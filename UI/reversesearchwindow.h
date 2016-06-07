@@ -10,12 +10,15 @@
 #include <QTreeWidget>
 #include <QPlainTextEdit>
 #include "reversesearchmodel.h"
+#include "UI/reverseindexprogressdialog.h"
 
 class ReverseSearchWindow : public QMainWindow
 {
     Q_OBJECT
 
     ReverseSearchModel *reverseSearchModel = nullptr;
+
+    ReverseIndexProgressDialog *reverseIndexProgressDialog = nullptr;
 
     QPushButton *indexButton = nullptr;
     QVBoxLayout *vbox = nullptr;
@@ -25,6 +28,7 @@ class ReverseSearchWindow : public QMainWindow
 
 public:
     ReverseSearchWindow(QWidget *parent);
+    void checkIndex();
     ~ReverseSearchWindow() {}
 protected:
     void searchStringUpdated(QString newString);

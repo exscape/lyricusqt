@@ -60,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         }
         reverseSearchWindow->show();
         reverseSearchWindow->setFocus();
+        reverseSearchWindow->checkIndex();
     });
 
     lyricsTextEdit = new QPlainTextEdit;

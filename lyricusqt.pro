@@ -37,7 +37,8 @@ SOURCES += main.cpp\
     UI/manualdownloaderwindow.cpp \
     lyricdownloaderworker.cpp \
     UI/configdialog.cpp \
-    application.cpp
+    application.cpp \
+    UI/reverseindexprogressdialog.cpp
 
 HEADERS  += \
     track.h \
@@ -54,7 +55,8 @@ HEADERS  += \
     UI/lyricdownloaderwindow.h \
     lyricdownloaderworker.h \
     UI/configdialog.h \
-    application.h
+    application.h \
+    UI/reverseindexprogressdialog.h
 
 INCLUDEPATH += taglib-1.11
 INCLUDEPATH += taglib-1.11/taglib

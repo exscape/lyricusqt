@@ -50,27 +50,6 @@ ReverseSearchModel::ReverseSearchModel() {
     qDebug() << "Database set up/opened successfully";
 }
 
-void ReverseSearchModel::indexFilesRecursively(const QString &sDir, int max_depth) {
-    QDir dir(sDir);
-    QFileInfoList list = dir.entryInfoList(dir.nameFilters(), QDir::AllEntries | QDir::NoDotAndDotDot);
-
-    for (QFileInfo info : list) {
-//        if (Application::shouldTerminate)
-//            return {};
-        QString sFilePath = info.filePath();
-        QString absPath = info.absoluteFilePath();
-
-        if (absPath.endsWith(".mp3", Qt::CaseInsensitive)|| absPath.endsWith(".m4a", Qt::CaseInsensitive)) {
-            indexFile(absPath);
-        }
-
-        if (max_depth > 0 && info.isDir() && !info.isSymLink()) {
-            qDebug() << "Indexing" << sFilePath;
-            indexFilesRecursively(sFilePath, max_depth - 1);
-        }
-    }
-}
-
 void ReverseSearchModel::indexFile(const QString &path) {
     QString artist, title, album;
     {
@@ -133,6 +112,8 @@ QList<Track> ReverseSearchModel::tracksMatchingLyrics(const QString &partialLyri
 }
 
 void ReverseSearchModel::updateIndex() {
+    _abort = false;
+
     QSqlQuery query("DELETE FROM data");
     id = 1;
     query.exec();
@@ -140,16 +121,79 @@ void ReverseSearchModel::updateIndex() {
 
     QVector<Path> paths = Application::getSetting("pathsToIndex").value<QVector<Path>>();
 
+    QVector<QString> songsToIndex;
+
     for (const Path &path : paths) {
         QDir dir(path.path);
         if (dir.exists()) {
             qDebug() << "Indexing files from" << path.path << "with a depth of" << path.depth;
-            indexFilesRecursively(path.path, path.depth);
+            songsToIndex << findSongsRecursively(path.path, path.path, path.depth);
         }
         else
             qDebug() << "Ignoring non-existent directory" << path.path;
     }
 
+    qDebug() << "Found" << songsToIndex.length() << "songs to index";
+
+    if (_abort) {
+        db.commit();
+        return;
+    }
+
+    emit indexingStarted(songsToIndex.length());
+
+    int finished = 0;
+    const int total = songsToIndex.length();
+    for (const QString &path : songsToIndex) {
+        if (_abort) {
+            db.commit();
+            return;
+        }
+        indexFile(path);
+        emit indexingProgressUpdate(finished++, total);
+        Application::processEvents();
+    }
+
     db.commit();
     qDebug() << "Index updated";
+
+    emit indexingFinished();
+}
+
+QVector<QString> ReverseSearchModel::findSongsRecursively(QString rootDir, const QString &sDir, int max_depth) {
+    QVector<QString> v;
+    QDir dir(sDir);
+    QFileInfoList list = dir.entryInfoList(dir.nameFilters(), QDir::AllEntries | QDir::NoDotAndDotDot);
+
+    for (QFileInfo info : list) {
+        if (_abort)
+          return {};
+        if (!rootDir.endsWith('/') && !rootDir.endsWith('\\'))
+            rootDir.append('/');
+        QString sFilePath = info.filePath();
+        if (info.suffix() == "mp3" || info.suffix() == "m4a")
+            v.push_back(info.absoluteFilePath());
+
+        if (max_depth > 0 && info.isDir() && !info.isSymLink()) {
+            v << findSongsRecursively(rootDir, sFilePath, max_depth - 1);
+        }
+    }
+
+    return v;
+}
+
+int ReverseSearchModel::numberOfTracksInIndex() {
+    QSqlQuery query;
+    query.prepare("SELECT COUNT(*) FROM data");
+    query.exec();
+
+    int rows = 0;
+    if (query.next())
+        rows = query.value(0).toInt();
+
+    return rows;
+}
+
+void ReverseSearchModel::abortIndexUpdate() {
+    _abort = true;
 }

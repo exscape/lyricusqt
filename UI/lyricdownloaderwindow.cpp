@@ -164,6 +164,8 @@ void LyricDownloaderWindow::startButtonClicked() {
     addFilesButton->setEnabled(false);
     addFolderButton->setEnabled(false);
     overwriteLyricsCheckBox->setEnabled(false);
+
+    setWindowTitle("Lyricus - Lyric Downloader");
 }
 
 void LyricDownloaderWindow::progressUpdate(int index, LyricStatus status) {

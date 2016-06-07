@@ -2,12 +2,14 @@
 #include "reversesearchmodel.h"
 #include "shared.h"
 #include "track.h"
+#include "application.h"
 #include <QHeaderView>
 #include <QDebug>
 #include <QScrollBar>
 #include <QPalette>
 #include <QTextCursor>
 #include <QTextCharFormat>
+#include <QMessageBox>
 
 void ReverseSearchWindow::searchStringUpdated(QString newString) {
     if (newString.length() <= 2)
@@ -35,7 +37,33 @@ ReverseSearchWindow::ReverseSearchWindow(QWidget *parent) : QMainWindow(parent) 
     vbox = new QVBoxLayout;
     indexButton = new QPushButton("Update index");
     connect(indexButton, &QPushButton::clicked, [&] {
+        if (reverseIndexProgressDialog == nullptr)
+            reverseIndexProgressDialog = new ReverseIndexProgressDialog(this);
+        reverseIndexProgressDialog->setModal(true);
+
+        connect(reverseIndexProgressDialog, &ReverseIndexProgressDialog::abortClicked, this, [&] {
+            reverseSearchModel->abortIndexUpdate();
+            reverseIndexProgressDialog->hide();
+        });
+
+        reverseIndexProgressDialog->show();
         reverseSearchModel->updateIndex();
+        Application::processEvents();
+    });
+
+    connect(reverseSearchModel, &ReverseSearchModel::indexingStarted, [&](int total) {
+        reverseIndexProgressDialog->setProgress(0, total);
+        Application::processEvents();
+    });
+
+    connect(reverseSearchModel, &ReverseSearchModel::indexingProgressUpdate, [&](int finished, int total) {
+        reverseIndexProgressDialog->setProgress(finished, total);
+        Application::processEvents();
+    });
+
+    connect(reverseSearchModel, &ReverseSearchModel::indexingFinished, [&] {
+        reverseIndexProgressDialog->hide();
+        qDebug() << "Indexing finished";
     });
 
     searchString = new QLineEdit;
@@ -110,4 +138,11 @@ ReverseSearchWindow::ReverseSearchWindow(QWidget *parent) : QMainWindow(parent) 
 
     resize(600, 700);
     setWindowTitle("Lyricus - Reverse Lyric Search");
+}
+
+void ReverseSearchWindow::checkIndex() {
+    if (reverseSearchModel->numberOfTracksInIndex() <= 0) {
+        QMessageBox::information(this, "The index is empty", "The reverse lyric search index is empty. You need to set the index paths in the Preferences window, "
+                                       "and then update the index before this window will be useful.", QMessageBox::Ok);
+    }
 }
