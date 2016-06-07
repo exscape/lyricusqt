@@ -9,14 +9,13 @@
 #include <QLineEdit>
 #include <QTreeWidget>
 #include <QPlainTextEdit>
-
-class ReverseSearchModel;
+#include "reversesearchmodel.h"
 
 class ReverseSearchWindow : public QMainWindow
 {
     Q_OBJECT
 
-    ReverseSearchModel *dataModel = nullptr;
+    ReverseSearchModel *reverseSearchModel = nullptr;
 
     QPushButton *indexButton = nullptr;
     QVBoxLayout *vbox = nullptr;
@@ -25,7 +24,7 @@ class ReverseSearchWindow : public QMainWindow
     QPlainTextEdit *lyricDisplay = nullptr;
 
 public:
-    ReverseSearchWindow(ReverseSearchModel *model, QWidget *parent);
+    ReverseSearchWindow(QWidget *parent);
     ~ReverseSearchWindow() {}
 protected:
     void searchStringUpdated(QString newString);

@@ -1,7 +1,6 @@
 #include "UI/mainwindow.h"
 #include <QDesktopWidget>
 #include <QApplication>
-#include "reversesearchmodel.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     qRegisterMetaType<FetchResult>("FetchResult");
@@ -57,8 +56,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     });
     lyricsMenu->addAction("&Reverse lyric search", this, [&] {
         if (reverseSearchWindow == nullptr) {
-            reverseSearchWindow = new ReverseSearchWindow(reverseSearchModel, this);
-            reverseSearchModel = new ReverseSearchModel;
+            reverseSearchWindow = new ReverseSearchWindow(this);
         }
         reverseSearchWindow->show();
         reverseSearchWindow->setFocus();

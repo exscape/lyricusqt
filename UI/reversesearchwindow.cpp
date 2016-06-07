@@ -1,5 +1,6 @@
 #include "UI/reversesearchwindow.h"
 #include "reversesearchmodel.h"
+#include "shared.h"
 #include "track.h"
 #include <QHeaderView>
 #include <QDebug>
@@ -16,7 +17,7 @@ void ReverseSearchWindow::searchStringUpdated(QString newString) {
     if (newString.length() <= 2)
         return;
 
-    QList<Track> data = dataModel->tracksMatchingLyrics(newString);
+    QList<Track> data = reverseSearchModel->tracksMatchingLyrics(newString);
     qDebug() << data.length() << "tracks matched";
 
     results->clear();
@@ -31,15 +32,14 @@ void ReverseSearchWindow::searchStringUpdated(QString newString) {
     results->addTopLevelItems(items);
 }
 
-ReverseSearchWindow::ReverseSearchWindow(ReverseSearchModel *model, QWidget *parent) : QMainWindow(parent) {
-    this->dataModel = model;
+ReverseSearchWindow::ReverseSearchWindow(QWidget *parent) : QMainWindow(parent) {
+    reverseSearchModel = new ReverseSearchModel;
 
     QWidget *window = new QWidget;
     vbox = new QVBoxLayout;
     indexButton = new QPushButton("Update index");
-    connect(indexButton, &QPushButton::clicked, [&] (bool checked) {
-        Q_UNUSED(checked);
-        dataModel->updateIndex();
+    connect(indexButton, &QPushButton::clicked, [&] {
+        reverseSearchModel->updateIndex();
     });
 
     searchString = new QLineEdit;
