@@ -106,7 +106,7 @@ void LyricDownloaderWindow::startButtonClicked() {
     QList<QPair<int, QString>> filesToProcess;
     for (int i = 0; i < fileList->topLevelItemCount(); i++) {
         auto *item = fileList->topLevelItem(i);
-        LyricStatus status = item->data(0, Qt::UserRole).value<LyricStatus>();
+        LyricStatus status = item->data(0, LyricStatusRole).value<LyricStatus>();
         if (status == LyricStatus::NotProcessed || overwriteLyricsCheckBox->isChecked())
             filesToProcess.append({ i, item->data(1, Qt::DisplayRole).toString() });
     }
@@ -170,7 +170,7 @@ void LyricDownloaderWindow::progressUpdate(int index, LyricStatus status) {
     Q_ASSERT(index < fileList->topLevelItemCount());
     auto *item = fileList->topLevelItem(index);
 
-    item->setData(0, Qt::UserRole, qVariantFromValue(status));
+    item->setData(0, LyricStatusRole, qVariantFromValue(status));
 
     if (status == LyricStatus::DownloadFailed) {
         item->setBackgroundColor(0, QColor(Qt::red));
@@ -255,7 +255,7 @@ void LyricDownloaderWindow::dropEvent(QDropEvent *e) {
 
 void LyricDownloaderWindow::addFile(const QString &file) {
     auto *item = new QTreeWidgetItem({"?", file});
-    item->setData(0, Qt::UserRole, qVariantFromValue(LyricStatus::NotProcessed));
+    item->setData(0, LyricStatusRole, qVariantFromValue(LyricStatus::NotProcessed));
     fileList->addTopLevelItem(item);
 }
 

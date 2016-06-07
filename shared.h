@@ -14,6 +14,12 @@ enum class FetchResult {
     NoMatch
 };
 
+enum Roles {
+    LyricStatusRole = Qt::UserRole,          // Stores the shared_ptr<IndexedObject> represented by a list item
+    LyricsRole = Qt::UserRole + 1,
+    PathRole = Qt::UserRole + 2,        // Stores an unmodified path, in cases where the DisplayRole might differ
+};
+
 Q_DECLARE_METATYPE(FetchResult)
 
 // Represents a file path to index. An array of these describes the list of locations to search for files and folders.

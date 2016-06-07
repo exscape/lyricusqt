@@ -24,6 +24,13 @@ class ConfigDialog : public QDialog
     QVBoxLayout *siteTreeVbox = nullptr;
     QTreeWidget *siteTreeWidget = nullptr;
 
+    QGroupBox *pathsToIndexGroup = nullptr;
+    QVBoxLayout *pathsToIndexVbox = nullptr;
+    QTreeWidget *pathsToIndex = nullptr;
+    QPushButton *addButton = nullptr;
+    QPushButton *editButton = nullptr;
+    QPushButton *removeButton = nullptr;
+
     QVBoxLayout *vbox = nullptr;
     QHBoxLayout *hbox = nullptr;
     QPushButton *okButton = nullptr;
@@ -38,6 +45,12 @@ public:
 
     void loadSettings();
     bool saveSettings();
+    void addPath();
+    void editPath();
+    void removePath();
+    void selectionChanged(QTreeWidgetItem *cur, QTreeWidgetItem *prev);
+    void itemEdited(QTreeWidgetItem *item, int column);
+    void validatePath(QTreeWidgetItem *item);
 
     void ok();
     void cancel();

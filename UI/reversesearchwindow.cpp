@@ -9,10 +9,6 @@
 #include <QTextCursor>
 #include <QTextCharFormat>
 
-enum CustomRoles {
-    LyricsRole = Qt::UserRole + 1,
-};
-
 void ReverseSearchWindow::searchStringUpdated(QString newString) {
     if (newString.length() <= 2)
         return;

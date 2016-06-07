@@ -1,5 +1,6 @@
 #include "reversesearchmodel.h"
 #include "shared.h"
+#include "application.h"
 #include <taglib/fileref.h>
 #include <taglib/mpeg/mpegfile.h>
 #include <taglib/mpeg/id3v2/frames/unsynchronizedlyricsframe.h>
@@ -15,7 +16,6 @@
 #include <QFileInfo>
 #include <QStandardPaths>
 #include <QMessageBox>
-#include <QApplication>
 
 ReverseSearchModel::ReverseSearchModel() {
     db = QSqlDatabase::addDatabase("QSQLITE");
@@ -65,14 +65,13 @@ void ReverseSearchModel::indexFilesRecursively(const QString &sDir, int max_dept
         }
 
         if (max_depth > 0 && info.isDir() && !info.isSymLink()) {
+            qDebug() << "Indexing" << sFilePath;
             indexFilesRecursively(sFilePath, max_depth - 1);
         }
     }
 }
 
 void ReverseSearchModel::indexFile(const QString &path) {
-    qDebug() << "Indexing" << path;
-
     QString artist, title, album;
     {
         // For some reason, The MPEG::File open below fails if this is still open.
@@ -88,7 +87,6 @@ void ReverseSearchModel::indexFile(const QString &path) {
         artist = tag->artist().toCString(true);
         title = tag->title().toCString(true);
         album = tag->album().toCString(true);
-//            qDebug() << "Read data:" << artist << "-" << title;
     }
 
     if (artist.length() < 1 || title.length() < 1)
@@ -97,8 +95,6 @@ void ReverseSearchModel::indexFile(const QString &path) {
     QString lyrics = lyricsForFile(path);
     if (lyrics.length() < 1)
         return;
-
-    qDebug() << "Lyrics begin with:" << lyrics.mid(0, 25) << "...";
 
     QSqlQuery query;
     query.prepare("INSERT INTO data (id, artist, title, album, lyrics) VALUES (:id, :artist, :title, :album, :lyrics)");
@@ -114,8 +110,6 @@ void ReverseSearchModel::indexFile(const QString &path) {
         qDebug() << "driver last error: " << db.lastError().driverText();
         qDebug() << "---------------------------------------------------------------";
     }
-    else
-        qDebug() << "Insert successful for" << artist << "-" << title;
 }
 
 QList<Track> ReverseSearchModel::tracksMatchingLyrics(const QString &partialLyrics) {
@@ -142,7 +136,20 @@ void ReverseSearchModel::updateIndex() {
     QSqlQuery query("DELETE FROM data");
     id = 1;
     query.exec();
-    qDebug() << "Updating index...";
-    indexFilesRecursively("D:\\Music\\Music\\Dream Theater", 5);
+    qDebug() << "Updating reverse search index...";
+
+    QVector<Path> paths = Application::getSetting("pathsToIndex").value<QVector<Path>>();
+
+    for (const Path &path : paths) {
+        QDir dir(path.path);
+        if (dir.exists()) {
+            qDebug() << "Indexing files from" << path.path << "with a depth of" << path.depth;
+            indexFilesRecursively(path.path, path.depth);
+        }
+        else
+            qDebug() << "Ignoring non-existent directory" << path.path;
+    }
+
     db.commit();
+    qDebug() << "Index updated";
 }
