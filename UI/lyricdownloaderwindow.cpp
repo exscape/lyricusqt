@@ -107,7 +107,7 @@ void LyricDownloaderWindow::startButtonClicked() {
     for (int i = 0; i < fileList->topLevelItemCount(); i++) {
         auto *item = fileList->topLevelItem(i);
         LyricStatus status = item->data(0, Qt::UserRole).value<LyricStatus>();
-        if (status == LyricStatus::NotProcessed)
+        if (status == LyricStatus::NotProcessed || overwriteLyricsCheckBox->isChecked())
             filesToProcess.append({ i, item->data(1, Qt::DisplayRole).toString() });
     }
 
@@ -154,6 +154,10 @@ void LyricDownloaderWindow::startButtonClicked() {
 
     disconnect(startDownloadButton, &QPushButton::clicked, 0, 0);
     connect(startDownloadButton, &QPushButton::clicked, worker, &LyricDownloaderWorker::abort);
+    connect(startDownloadButton, &QPushButton::clicked, [this] {
+        startDownloadButton->setText("Stopping...");
+        startDownloadButton->setEnabled(false);
+    });
     startDownloadButton->setText("Stop download");
     startDownloadButton->setEnabled(true);
 
@@ -190,6 +194,8 @@ void LyricDownloaderWindow::progressUpdate(int index, LyricStatus status) {
         fileList->scrollToItem(item);
 
     progressBar->setValue(progressBar->value() + 1);
+
+    fileList->repaint();
 }
 
 bool LyricDownloaderWindow::eventFilter(QObject *target, QEvent *event) {
