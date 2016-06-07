@@ -108,9 +108,9 @@ ReverseSearchWindow::ReverseSearchWindow(QWidget *parent) : QMainWindow(parent) 
         fmt.setForeground(QColor(Qt::white));
 
         int firstIndex = -1;
-        int lastIndex = 0;
+        int lastIndex = -1;
         int matchIndex = -1;
-        while ((matchIndex = lyricData.indexOf(searchString->text(), lastIndex + 1, Qt::CaseInsensitive)) > 0) {
+        while ((matchIndex = lyricData.indexOf(searchString->text(), lastIndex + 1, Qt::CaseInsensitive)) >= 0) {
             QTextCursor cursor(lyricDisplay->document());
             cursor.setPosition(matchIndex, QTextCursor::MoveAnchor);
             cursor.setPosition(matchIndex + searchString->text().length(), QTextCursor::KeepAnchor);
