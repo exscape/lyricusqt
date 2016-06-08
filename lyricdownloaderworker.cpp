@@ -47,7 +47,7 @@ void LyricDownloaderWorker::process() {
     }
 
     if (!overwriteLyrics && lyricsForFile(filesToProcess[currentIndex].second).length() > 0) {
-        qDebug() << "LyricDownloadWorker::process: " << filesToProcess[currentIndex].second << "already had lyrics, skipping";
+//      qDebug() << "LyricDownloadWorker::process: " << filesToProcess[currentIndex].second << "already had lyrics, skipping";
         emit updateProgress(filesToProcess[currentIndex].first, LyricStatus::HadLyrics);
         QMetaObject::invokeMethod(this, "process", Qt::QueuedConnection); // To avoid increasing the recursion depth by calling process() as usual
         return;
@@ -57,7 +57,7 @@ void LyricDownloaderWorker::process() {
     QString artist = pair.first;
     QString title = pair.second;
 
-    qDebug() << "Calling fetchLyrics for" << artist << "-" << title;
+//  qDebug() << "Calling fetchLyrics for" << artist << "-" << title;
     connect(lyricFetcher, &LyricFetcher::fetchFinished, this, &LyricDownloaderWorker::fetchFinished, static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection));
     lyricFetcher->fetchLyrics(artist, title);
 }

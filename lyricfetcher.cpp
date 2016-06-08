@@ -17,7 +17,7 @@ LyricFetcher::LyricFetcher(QObject *parent) : QObject(parent) {
 void LyricFetcher::fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback, int siteIndex) {
     Q_ASSERT(siteIndex < lyricSites.length());
 
-    qDebug() << "LyricFetcher: trying site #" << siteIndex << QString("(%1)").arg(lyricSites[siteIndex]->siteName());
+//  qDebug() << "LyricFetcher: trying site #" << siteIndex << QString("(%1)").arg(lyricSites[siteIndex]->siteName());
     LyricSite *site = lyricSites[siteIndex];
     site->fetchLyrics(artist, title, [=](const QString &lyrics, FetchResult result) {
         if (result == FetchResult::Success) {
