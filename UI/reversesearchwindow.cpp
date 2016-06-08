@@ -30,10 +30,9 @@ void ReverseSearchWindow::searchStringUpdated(QString newString) {
     results->addTopLevelItems(items);
 }
 
-ReverseSearchWindow::ReverseSearchWindow(QWidget *parent) : QMainWindow(parent) {
+ReverseSearchWindow::ReverseSearchWindow(QWidget *parent) : QWidget(parent) {
     reverseSearchModel = new ReverseSearchModel;
 
-    QWidget *window = new QWidget;
     vbox = new QVBoxLayout;
     indexButton = new QPushButton("Update index");
     connect(indexButton, &QPushButton::clicked, [&] {
@@ -80,8 +79,7 @@ ReverseSearchWindow::ReverseSearchWindow(QWidget *parent) : QMainWindow(parent) 
     vbox->setStretch(2, 2);
     vbox->setStretch(3, 5);
 
-    window->setLayout(vbox);
-    setCentralWidget(window);
+    setLayout(vbox);
 
     results->setIndentation(0);
     results->setColumnCount(2);

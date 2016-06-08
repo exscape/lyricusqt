@@ -1,7 +1,6 @@
 #ifndef REVERSESEARCHWINDOW_H
 #define REVERSESEARCHWINDOW_H
 
-#include <QMainWindow>
 #include <QLabel>
 #include <QPushButton>
 #include <QHBoxLayout>
@@ -12,7 +11,7 @@
 #include "reversesearchmodel.h"
 #include "UI/reverseindexprogressdialog.h"
 
-class ReverseSearchWindow : public QMainWindow
+class ReverseSearchWindow : public QWidget
 {
     Q_OBJECT
 

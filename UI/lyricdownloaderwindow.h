@@ -1,7 +1,6 @@
 #ifndef LYRICDOWNLOADERWINDOW_H
 #define LYRICDOWNLOADERWINDOW_H
 
-#include <QMainWindow>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -19,7 +18,7 @@
 
 class ReverseSearchModel;
 
-class LyricDownloaderWindow : public QMainWindow
+class LyricDownloaderWindow : public QWidget
 {
     Q_OBJECT
     
@@ -45,6 +44,7 @@ protected:
     void startButtonClicked();
     void dragEnterEvent(QDragEnterEvent *e) override;
     void dropEvent(QDropEvent *e) override;
+    void closeEvent(QCloseEvent *e) override;
     void addFilesRecursively(const QString &sDir, int max_depth);
     void addFile(const QString &file);
 };

@@ -1,6 +1,6 @@
 #include "UI/mainwindow.h"
 #include <QDesktopWidget>
-#include <QApplication>
+#include "Application.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     qRegisterMetaType<FetchResult>("FetchResult");
@@ -72,4 +72,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     QDesktopWidget dw;
     move(dw.width() / 2 - width()/2, dw.height() / 2 - height()/2);
     setWindowTitle("Lyricus");
+}
+
+void MainWindow::closeEvent(QCloseEvent *closeEvent) {
+    bool shouldExit = true;
+
+    // Don't exit if the downloader is running -- unless the user says "yes" (in which case close() returns true).
+    if (lyricDownloaderWindow) {
+        if (!lyricDownloaderWindow->close())
+            shouldExit = false;
+    }
+
+    if (shouldExit)
+        Application::quit();
+    else
+        closeEvent->ignore(); // Otherwise the main window will close, but the others will live on
 }

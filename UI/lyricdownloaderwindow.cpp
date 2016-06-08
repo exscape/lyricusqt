@@ -6,7 +6,7 @@
 #include <QMessageBox>
 #include <QAction>
 
-LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QMainWindow(parent) {
+LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QWidget(parent) {
     qRegisterMetaType<LyricStatus>("LyricStatus");
 
     fileList = new QTreeWidget;
@@ -40,13 +40,11 @@ LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QMainWindow(pare
     bottomHbox->addWidget(addFilesButton);
     bottomHbox->addWidget(startDownloadButton);
 
-    QWidget *central = new QWidget;
-    central->setLayout(vbox);
     vbox->addWidget(fileList);
     vbox->addWidget(progressBar);
     vbox->addWidget(overwriteLyricsCheckBox);
     vbox->addLayout(bottomHbox);
-    setCentralWidget(central);
+    setLayout(vbox);
 
     connect(addFolderButton, &QPushButton::clicked, [&] {
         QFileDialog fileDialog;
@@ -84,6 +82,7 @@ LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QMainWindow(pare
     connect(startDownloadButton, &QPushButton::clicked, this, &LyricDownloaderWindow::startButtonClicked);
 
     resize(900, 600);
+    setWindowTitle("Lyricus - Lyric Downloader");
 
     setAcceptDrops(true);
 }
@@ -150,6 +149,8 @@ void LyricDownloaderWindow::startButtonClicked() {
         auto *item = fileList->topLevelItem(lastProcessedIndex + 1);
         if (item)
             item->setBackgroundColor(0, QColor(Qt::red));
+
+        qDebug() << "Lyric download successfully aborted.";
     }, Qt::QueuedConnection);
 
     disconnect(startDownloadButton, &QPushButton::clicked, 0, 0);
@@ -164,8 +165,6 @@ void LyricDownloaderWindow::startButtonClicked() {
     addFilesButton->setEnabled(false);
     addFolderButton->setEnabled(false);
     overwriteLyricsCheckBox->setEnabled(false);
-
-    setWindowTitle("Lyricus - Lyric Downloader");
 }
 
 void LyricDownloaderWindow::progressUpdate(int index, LyricStatus status) {
@@ -214,7 +213,7 @@ bool LyricDownloaderWindow::eventFilter(QObject *target, QEvent *event) {
         }
     }
 
-    return QMainWindow::eventFilter(target, event);
+    return QWidget::eventFilter(target, event);
 }
 
 void LyricDownloaderWindow::dragEnterEvent(QDragEnterEvent *e) {
@@ -253,6 +252,24 @@ void LyricDownloaderWindow::dropEvent(QDropEvent *e) {
 
     if (fileList->topLevelItemCount() > 0)
         startDownloadButton->setEnabled(true);
+}
+
+void LyricDownloaderWindow::closeEvent(QCloseEvent *e) {
+    if (workerThread && workerThread->isRunning()) {
+        if (QMessageBox::information(this, "Abort download?", "The lyric downloader is working. Do you want to abort and exit?", QMessageBox::Yes, QMessageBox::No)
+                == QMessageBox::Yes) {
+            e->accept();
+            QMetaObject::invokeMethod(worker, "abort", Qt::QueuedConnection);
+            qDebug() << "Sent abort to worker due to window close event";
+            return;
+        }
+        else {
+            e->ignore();
+            return;
+        }
+    }
+
+    e->accept();
 }
 
 void LyricDownloaderWindow::addFile(const QString &file) {

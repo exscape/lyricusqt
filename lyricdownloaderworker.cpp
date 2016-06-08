@@ -22,6 +22,7 @@ void LyricDownloaderWorker::fetchFinished(QString lyrics, FetchResult result) {
         else {
             // Failure
             emit updateProgress(listIndex, LyricStatus::DownloadFailed);
+            qWarning() << "Failed to write lyrics for" << path;
         }
     }
     else if (result == FetchResult::NoMatch)

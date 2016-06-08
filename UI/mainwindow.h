@@ -28,6 +28,7 @@ class MainWindow : public QMainWindow
     QMenu *lyricsMenu = nullptr;
 public:
     explicit MainWindow(QWidget *parent = 0);
+    void closeEvent(QCloseEvent *closeEvent) override;
     ~MainWindow() {}
 
 signals:
