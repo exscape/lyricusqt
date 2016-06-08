@@ -134,7 +134,7 @@ void DarkLyricsSite::lyricsPageResponseHandler(const QString &artist, const QStr
     }
 
     QString receivedHTML = QString(reply->readAll());
-    QRegularExpression re(R"##(<h3><a name="\d+">\d+\. ([^<]*?)</a></h3><br />\s*([\s\S]+?)(?=<br /><br />))##");
+    QRegularExpression re(R"##(<h3><a name="\d+">\d+\. ([^<]*?)</a></h3><br />\s*([\s\S]*?)(?=<br /><br />))##");
     re.setPatternOptions(re.patternOptions() | QRegularExpression::CaseInsensitiveOption);
     QRegularExpressionMatchIterator matchIterator = re.globalMatch(receivedHTML, 0, QRegularExpression::NormalMatch);
 
@@ -153,7 +153,11 @@ void DarkLyricsSite::lyricsPageResponseHandler(const QString &artist, const QStr
 
     // Finally, use the cache to actually look up the lyrics we wanted to fetch in the first place.
     if (lyricsCache.contains({simplifiedArtist, simplifiedTitle})) {
-        callback(lyricsCache[{simplifiedArtist, simplifiedTitle}], FetchResult::Success);
+        QString lyrics = lyricsCache[{simplifiedArtist, simplifiedTitle}];
+        if (lyrics.length() > 0)
+            callback(lyricsCache[{simplifiedArtist, simplifiedTitle}], FetchResult::Success);
+        else
+            callback({}, FetchResult::NoMatch);
         return;
     }
 
