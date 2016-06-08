@@ -5,6 +5,7 @@
 #include <taglib/mpeg/id3v2/id3v2tag.h>
 #include <taglib/mp4/mp4file.h>
 #include <QFile>
+#include <QFileInfo>
 #include <QDebug>
 #include <QPair>
 
@@ -21,7 +22,8 @@ QPair<QString, QString> artistAndTitleForFile(const QString &path) {
 }
 
 QString lyricsForFile(const QString &path) {
-    if (path.endsWith(".mp3")) {
+    QFileInfo info(path);
+    if (info.suffix().toLower() == "mp3") {
         TagLib::MPEG::File mpf(QFile::encodeName(path).constData());
         if (!mpf.isOpen() || !mpf.isValid())
             return {};
@@ -40,7 +42,7 @@ QString lyricsForFile(const QString &path) {
 
         return frame->text().toCString(true);
     }
-    else if (path.endsWith(".m4a")) {
+    else if (info.suffix().toLower() == "m4a") {
         TagLib::MP4::File file(QFile::encodeName(path).constData());
         if (!file.isOpen() || !file.isValid())
             return {};
@@ -58,7 +60,8 @@ QString lyricsForFile(const QString &path) {
 }
 
 bool setLyricsForFile(const QString &path, const QString &lyrics) {
-    if (path.endsWith(".mp3")) {
+    QFileInfo info(path);
+    if (info.suffix().toLower() == "mp3") {
         TagLib::MPEG::File mpf(QFile::encodeName(path).constData());
         if (!mpf.isOpen() || !mpf.isValid())
             return false;
@@ -94,7 +97,7 @@ bool setLyricsForFile(const QString &path, const QString &lyrics) {
         return success;
 
     }
-    else if (path.endsWith(".m4a")) {
+    else if (info.suffix().toLower() == "m4a") {
         TagLib::MP4::File file(QFile::encodeName(path).constData());
         if (!file.isOpen() || !file.isValid())
             return {};

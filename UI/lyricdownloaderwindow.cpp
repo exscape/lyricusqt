@@ -229,7 +229,7 @@ void LyricDownloaderWindow::dragEnterEvent(QDragEnterEvent *e) {
     for (const QUrl &url : e->mimeData()->urls()) {
         QString local = url.toLocalFile();
         QFileInfo fileInfo(local);
-        if (fileInfo.isDir() || fileInfo.suffix() == "mp3" || fileInfo.suffix() == "m4a") {
+        if (fileInfo.isDir() || fileInfo.suffix().toLower() == "mp3" || fileInfo.suffix().toLower() == "m4a") {
             e->acceptProposedAction();
             return;
         }
@@ -241,7 +241,7 @@ void LyricDownloaderWindow::dropEvent(QDropEvent *e) {
     for (const QUrl &url : e->mimeData()->urls()) {
         QString local = url.toLocalFile();
         QFileInfo fileInfo(local);
-        if (fileInfo.suffix() == "mp3" || fileInfo.suffix() == "m4a") {
+        if (fileInfo.suffix().toLower() == "mp3" || fileInfo.suffix().toLower() == "m4a") {
             addFile(local);
         }
         else if (fileInfo.isDir()) {

@@ -171,7 +171,7 @@ QVector<QString> ReverseSearchModel::findSongsRecursively(QString rootDir, const
         if (!rootDir.endsWith('/') && !rootDir.endsWith('\\'))
             rootDir.append('/');
         QString sFilePath = info.filePath();
-        if (info.suffix() == "mp3" || info.suffix() == "m4a")
+        if (info.suffix().toLower() == "mp3" || info.suffix().toLower() == "m4a")
             v.push_back(info.absoluteFilePath());
 
         if (max_depth > 0 && info.isDir() && !info.isSymLink()) {
