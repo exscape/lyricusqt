@@ -27,7 +27,7 @@ class ReverseSearchWindow : public QMainWindow
     QPlainTextEdit *lyricDisplay = nullptr;
 
 public:
-    ReverseSearchWindow(QWidget *parent);
+    ReverseSearchWindow(QWidget *parent = 0);
     void checkIndex();
     ~ReverseSearchWindow() {}
 protected:

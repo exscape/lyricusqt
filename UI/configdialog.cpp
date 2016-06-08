@@ -94,6 +94,8 @@ ConfigDialog::ConfigDialog(QWidget *parent) : QDialog(parent) {
 
     setLayout(vbox);
     resize(400, 400);
+
+    setWindowTitle("Lyricus Preferences");
 }
 
 void ConfigDialog::updateSiteList() {

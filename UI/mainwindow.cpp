@@ -50,13 +50,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     lyricsMenu->addAction("&Lyric downloader", this, [&] {
         if (lyricDownloaderWindow == nullptr)
-            lyricDownloaderWindow = new LyricDownloaderWindow(this);
+            lyricDownloaderWindow = new LyricDownloaderWindow;
         lyricDownloaderWindow->show();
         lyricDownloaderWindow->setFocus();
     });
     lyricsMenu->addAction("&Reverse lyric search", this, [&] {
         if (reverseSearchWindow == nullptr) {
-            reverseSearchWindow = new ReverseSearchWindow(this);
+            reverseSearchWindow = new ReverseSearchWindow;
         }
         reverseSearchWindow->show();
         reverseSearchWindow->setFocus();
