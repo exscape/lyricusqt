@@ -22,41 +22,42 @@ unix {
     CONFIG += console # fix qDebug output
 }
 
-SOURCES += main.cpp\
-    track.cpp \
+SOURCES +=\
     UI/reversesearchwindow.cpp \
     UI/mainwindow.cpp \
     UI/lyricdownloaderwindow.cpp \
-    lyricfetcher.cpp \
     Sites/lyricsite.cpp \
     Sites/darklyricssite.cpp \
     Sites/azlyricssite.cpp \
     Sites/songmeaningssite.cpp \
-    shared.cpp \
-    reversesearchmodel.cpp \
     UI/manualdownloaderwindow.cpp \
-    lyricdownloaderworker.cpp \
     UI/configdialog.cpp \
-    application.cpp \
-    UI/reverseindexprogressdialog.cpp
+    UI/reverseindexprogressdialog.cpp \
+    Misc/application.cpp \
+    Misc/main.cpp \
+    Misc/shared.cpp \
+    Misc/track.cpp \
+    Models/lyricdownloaderworker.cpp \
+    Models/lyricfetcher.cpp \
+    Models/reversesearchmodel.cpp
 
 HEADERS  += \
-    track.h \
     UI/reversesearchwindow.h \
     UI/mainwindow.h \
-    lyricfetcher.h \
     Sites/lyricsite.h \
     Sites/darklyricssite.h \
     Sites/azlyricssite.h \
     Sites/songmeaningssite.h \
-    shared.h \
-    reversesearchmodel.h \
     UI/manualdownloaderwindow.h \
     UI/lyricdownloaderwindow.h \
-    lyricdownloaderworker.h \
     UI/configdialog.h \
-    application.h \
-    UI/reverseindexprogressdialog.h
+    UI/reverseindexprogressdialog.h \
+    Misc/shared.h \
+    Misc/track.h \
+    Misc/application.h \
+    Models/lyricdownloaderworker.h \
+    Models/lyricfetcher.h \
+    Models/reversesearchmodel.h
 
 INCLUDEPATH += taglib-1.11
 INCLUDEPATH += taglib-1.11/taglib

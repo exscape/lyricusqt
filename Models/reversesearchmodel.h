@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QSqlDatabase>
 #include <QList>
-#include "track.h"
+#include "Misc/track.h"
 
 class ReverseSearchModel : public QObject
 {

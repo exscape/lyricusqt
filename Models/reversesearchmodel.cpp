@@ -1,6 +1,6 @@
-#include "reversesearchmodel.h"
-#include "shared.h"
-#include "application.h"
+#include "Models/reversesearchmodel.h"
+#include "Misc/shared.h"
+#include "Misc/application.h"
 #include <taglib/fileref.h>
 #include <taglib/mpeg/mpegfile.h>
 #include <taglib/mpeg/id3v2/frames/unsynchronizedlyricsframe.h>

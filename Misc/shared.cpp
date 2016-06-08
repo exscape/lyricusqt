@@ -1,4 +1,4 @@
-#include "shared.h"
+#include "Misc/shared.h"
 #include <taglib/fileref.h>
 #include <taglib/mpeg/mpegfile.h>
 #include <taglib/mpeg/id3v2/frames/unsynchronizedlyricsframe.h>

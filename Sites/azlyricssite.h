@@ -1,7 +1,7 @@
 #ifndef AZLYRICSSITE_H
 #define AZLYRICSSITE_H
 
-#include "lyricsite.h"
+#include "Sites/lyricsite.h"
 #include <functional>
 #include <tuple>
 #include <QtNetwork/QNetworkAccessManager>

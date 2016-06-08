@@ -1,5 +1,5 @@
-#include "reverseindexprogressdialog.h"
-#include "application.h"
+#include "UI/reverseindexprogressdialog.h"
+#include "Misc/application.h"
 #include <QDebug>
 
 ReverseIndexProgressDialog::ReverseIndexProgressDialog(QWidget *parent) : QDialog(parent) {

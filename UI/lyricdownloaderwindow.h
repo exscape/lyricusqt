@@ -14,7 +14,7 @@
 #include <QCheckBox>
 #include <QProgressBar>
 #include <QThread>
-#include "lyricdownloaderworker.h"
+#include "Models/lyricdownloaderworker.h"
 
 class ReverseSearchModel;
 

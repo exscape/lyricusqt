@@ -1,4 +1,4 @@
-#include "lyricsite.h"
+#include "Sites/lyricsite.h"
 
 LyricSite::LyricSite() {
 }

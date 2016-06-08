@@ -1,5 +1,5 @@
 #include "UI/mainwindow.h"
-#include "application.h"
+#include "Misc/application.h"
 
 int main(int argc, char *argv[])
 {

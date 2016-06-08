@@ -1,5 +1,5 @@
-#include "lyricdownloaderworker.h"
-#include "shared.h"
+#include "Models/lyricdownloaderworker.h"
+#include "Misc/shared.h"
 
 // Note that this constructor COPIES filesToProcess, to avoid having to share data
 // between threads.

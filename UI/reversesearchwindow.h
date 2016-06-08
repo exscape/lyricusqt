@@ -8,7 +8,7 @@
 #include <QLineEdit>
 #include <QTreeWidget>
 #include <QPlainTextEdit>
-#include "reversesearchmodel.h"
+#include "Models/reversesearchmodel.h"
 #include "UI/reverseindexprogressdialog.h"
 
 class ReverseSearchWindow : public QWidget

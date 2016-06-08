@@ -3,7 +3,7 @@
 
 #include <QString>
 #include <functional>
-#include "shared.h"
+#include "Misc/shared.h"
 
 class LyricSite
 {

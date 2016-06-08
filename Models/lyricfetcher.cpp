@@ -1,5 +1,5 @@
-#include "lyricfetcher.h"
-#include "application.h"
+#include "Models/lyricfetcher.h"
+#include "Misc/application.h"
 #include <QRegularExpression>
 #include <QVector>
 #include <QPair>

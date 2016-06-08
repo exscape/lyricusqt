@@ -1,5 +1,5 @@
-#include "darklyricssite.h"
-#include "shared.h"
+#include "Sites/darklyricssite.h"
+#include "Misc/shared.h"
 #include <QDebug>
 #include <QRegularExpression>
 #include <QtNetwork/QNetworkRequest>

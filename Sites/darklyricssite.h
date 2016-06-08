@@ -1,7 +1,7 @@
 #ifndef DARKLYRICSSITE_H
 #define DARKLYRICSSITE_H
 
-#include "lyricsite.h"
+#include "Sites/lyricsite.h"
 #include <functional>
 #include <tuple>
 #include <QtNetwork/QNetworkAccessManager>

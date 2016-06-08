@@ -1,4 +1,4 @@
-#include "manualdownloaderwindow.h"
+#include "UI/manualdownloaderwindow.h"
 
 ManualDownloaderWindow::ManualDownloaderWindow() {
     lyricFetcher = new LyricFetcher;

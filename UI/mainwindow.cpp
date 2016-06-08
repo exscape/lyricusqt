@@ -1,6 +1,6 @@
+#include "Misc/Application.h"
 #include "UI/mainwindow.h"
 #include <QDesktopWidget>
-#include "Application.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     qRegisterMetaType<FetchResult>("FetchResult");

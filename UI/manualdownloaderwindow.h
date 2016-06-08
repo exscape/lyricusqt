@@ -7,7 +7,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QPlainTextEdit>
-#include "lyricfetcher.h"
+#include "Models/lyricfetcher.h"
 
 class ManualDownloaderWindow : public QDialog
 {

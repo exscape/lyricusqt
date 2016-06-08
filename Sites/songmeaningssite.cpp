@@ -1,5 +1,5 @@
-#include "songmeaningssite.h"
-#include "shared.h"
+#include "Sites/songmeaningssite.h"
+#include "Misc/shared.h"
 #include <QDebug>
 #include <QRegularExpression>
 #include <QtNetwork/QNetworkRequest>

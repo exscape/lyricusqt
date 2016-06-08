@@ -1,10 +1,10 @@
-#include "configdialog.h"
+#include "UI/configdialog.h"
+#include "Misc/application.h"
+#include "Misc/shared.h"
 #include <QHeaderView>
 #include <QEvent>
 #include <QDropEvent>
 #include <QDebug>
-#include "application.h"
-#include "shared.h"
 #include <QMessageBox>
 #include <QDir>
 #include <QFileDialog>

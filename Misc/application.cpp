@@ -8,8 +8,7 @@
 #include <QSettings>
 #include <QPair>
 #include "UI/mainwindow.h"
-
-#include "application.h"
+#include "Misc/application.h"
 
 /*
 #ifdef Q_OS_MAC

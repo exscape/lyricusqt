@@ -1,8 +1,8 @@
 #include "UI/reversesearchwindow.h"
-#include "reversesearchmodel.h"
-#include "shared.h"
-#include "track.h"
-#include "application.h"
+#include "Models/reversesearchmodel.h"
+#include "Misc/shared.h"
+#include "Misc/track.h"
+#include "Misc/application.h"
 #include <QHeaderView>
 #include <QDebug>
 #include <QScrollBar>
@@ -10,25 +10,6 @@
 #include <QTextCursor>
 #include <QTextCharFormat>
 #include <QMessageBox>
-
-void ReverseSearchWindow::searchStringUpdated(QString newString) {
-    if (newString.length() <= 2)
-        return;
-
-    QList<Track> data = reverseSearchModel->tracksMatchingLyrics(newString);
-    qDebug() << data.length() << "tracks matched";
-
-    results->clear();
-
-    QList<QTreeWidgetItem*> items;
-    for (const Track &track : data) {
-        auto *item = new QTreeWidgetItem({ track.artist/*, track.album*/, track.title });
-        item->setData(0, LyricsRole, track.lyrics);
-        items.append(item);
-    }
-
-    results->addTopLevelItems(items);
-}
 
 ReverseSearchWindow::ReverseSearchWindow(QWidget *parent) : QWidget(parent) {
     reverseSearchModel = new ReverseSearchModel;
@@ -136,6 +117,25 @@ ReverseSearchWindow::ReverseSearchWindow(QWidget *parent) : QWidget(parent) {
 
     resize(600, 700);
     setWindowTitle("Lyricus - Reverse Lyric Search");
+}
+
+void ReverseSearchWindow::searchStringUpdated(QString newString) {
+    if (newString.length() <= 2)
+        return;
+
+    QList<Track> data = reverseSearchModel->tracksMatchingLyrics(newString);
+    qDebug() << data.length() << "tracks matched";
+
+    results->clear();
+
+    QList<QTreeWidgetItem*> items;
+    for (const Track &track : data) {
+        auto *item = new QTreeWidgetItem({ track.artist/*, track.album*/, track.title });
+        item->setData(0, LyricsRole, track.lyrics);
+        items.append(item);
+    }
+
+    results->addTopLevelItems(items);
 }
 
 void ReverseSearchWindow::checkIndex() {
