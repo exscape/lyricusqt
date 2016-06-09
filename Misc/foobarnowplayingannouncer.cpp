@@ -1,10 +1,7 @@
 #include "foobarnowplayingannouncer.h"
 #include <QDebug>
 #include <QThread>
-
-// TODO: REMOVE, DEBUGGING ONLY
-#include <QWaitCondition>
-#include <QMutex>
+#include <QFile>
 
 // This should be more than enough, since the struct is smaller
 #define BUFSIZE 2048
@@ -13,6 +10,7 @@ struct songInfo {
     // These are in UTF-8; use QString::fromUtf8() to create a QString
     char artist[512];
     char title[512];
+    char path[512];
 };
 
 FoobarNowPlayingAnnouncer::FoobarNowPlayingAnnouncer(QObject *parent) : QObject(parent) {
@@ -38,6 +36,7 @@ restart_loop:
 
         HANDLE hPipe = CreateFile(TEXT("\\\\.\\pipe\\foo_simpleserver_announce"), GENERIC_READ | FILE_WRITE_ATTRIBUTES, 0, NULL, OPEN_EXISTING, 0, NULL);
         if (hPipe == INVALID_HANDLE_VALUE) {
+//          qWarning() << "Unable to connect to foo_simpleserver_announce pipe";
             continue;
         }
 
@@ -69,9 +68,12 @@ restart_loop:
 
             QString artist = QString::fromUtf8(info->artist);
             QString title = QString::fromUtf8(info->title);
+            QString path = QString::fromUtf8(info->path);
+            if (path.startsWith("file://"))
+                path = path.right(path.length() - 7);
 
             if (artist.length() > 0 && title.length() > 0)
-                emit newTrack(artist, title);
+                emit newTrack(artist, title, path); // Note that path may be 0 -- though it should never be
         }
     }
 

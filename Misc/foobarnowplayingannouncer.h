@@ -12,7 +12,7 @@ public:
     explicit FoobarNowPlayingAnnouncer(QObject *parent = 0);
     void run();
 signals:
-    void newTrack(QString artist, QString title);
+    void newTrack(QString artist, QString title, QString path);
 };
 
 #endif // FOOBARNOWPLAYINGANNOUNCER_H

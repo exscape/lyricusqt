@@ -32,6 +32,7 @@ class MainWindow : public QMainWindow
     QMenu *lyricsMenu = nullptr;
 public:
     explicit MainWindow(QWidget *parent = 0);
+    void trackChanged(QString artist, QString title, QString path);
     void closeEvent(QCloseEvent *closeEvent) override;
     ~MainWindow() {}
 

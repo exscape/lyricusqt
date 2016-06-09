@@ -29,22 +29,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     fileMenu->addSeparator();
     fileMenu->addAction("E&xit", this, [&] { QApplication::quit(); }, QKeySequence::Quit);
 
+    manualDownloaderWindow = new ManualDownloaderWindow;
+    manualDownloaderWindow->setModal(true);
+
+    connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchStarted, [this](QString artist, QString title) {
+        qDebug() << "fetchStarted";
+        lyricsTextEdit->setPlainText(QString("Attempting to fetch lyrics for %1 - %2, please wait...").arg(artist, title));
+        manualDownloaderWindow->close();
+    });
+
+    connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchComplete, [this](QString lyrics, FetchResult result) {
+        // No need to check for errors, as "lyrics" contains an error message in that case -- which we want to display.
+        qDebug() << "fetchComplete w/ lyrics: " << lyrics.left(40) << "...";
+        lyricsTextEdit->setPlainText(lyrics);
+        Q_UNUSED(result);
+    });
+
     lyricsMenu->addAction("&Manual download", this, [&] {
-        if (manualDownloaderWindow == nullptr)
-            manualDownloaderWindow = new ManualDownloaderWindow;
-        manualDownloaderWindow->setModal(true);
-
-        connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchStarted, [this](QString artist, QString title) {
-            lyricsTextEdit->setPlainText(QString("Attempting to fetch lyrics for %1 - %2, please wait...").arg(artist, title));
-            manualDownloaderWindow->close();
-        });
-
-        connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchComplete, [this](QString lyrics, FetchResult result) {
-            // No need to check for errors, as "lyrics" contains an error message in that case -- which we want to display.
-            lyricsTextEdit->setPlainText(lyrics);
-            Q_UNUSED(result);
-        });
-
         manualDownloaderWindow->exec();
     });
 
@@ -71,9 +72,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     foobarNowPlayingAnnouncerThread = new QThread;
     foobarNowPlayingAnnouncer->moveToThread(foobarNowPlayingAnnouncerThread);
     connect(foobarNowPlayingAnnouncerThread, &QThread::started, foobarNowPlayingAnnouncer, &FoobarNowPlayingAnnouncer::run);
-    connect(foobarNowPlayingAnnouncer, &FoobarNowPlayingAnnouncer::newTrack, this, [&](QString artist, QString title) {
-        qDebug() << "newTrack handler called with" << artist << "-" << title;
-    });
+    connect(foobarNowPlayingAnnouncer, &FoobarNowPlayingAnnouncer::newTrack, this, &MainWindow::trackChanged);
 
     foobarNowPlayingAnnouncerThread->start();
 
@@ -81,6 +80,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     QDesktopWidget dw;
     move(dw.width() / 2 - width()/2, dw.height() / 2 - height()/2);
+    setWindowTitle("Lyricus");
+}
+
+void MainWindow::trackChanged(QString artist, QString title, QString path) {
+    // Called when the currently playing track changes, and we need to update the display
+    qDebug() << "trackChanged handler called with" << artist << "-" << title << "at" << path;
+
+//    QString lyrics = lyricsForFile(path);
+    QString lyrics;
+    if (lyrics.length() > 0) {
+        lyricsTextEdit->setPlainText(lyrics);
+        setWindowTitle(QString("%1 - %2").arg(artist, title));
+
+        return;
+    }
+    manualDownloaderWindow->fetchLyrics(artist, title);
     setWindowTitle("Lyricus");
 }
 
