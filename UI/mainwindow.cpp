@@ -67,6 +67,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setCentralWidget(lyricsTextEdit);
     lyricsTextEdit->setReadOnly(true);
 
+    foobarNowPlayingAnnouncer = new FoobarNowPlayingAnnouncer;
+    foobarNowPlayingAnnouncerThread = new QThread;
+    foobarNowPlayingAnnouncer->moveToThread(foobarNowPlayingAnnouncerThread);
+    connect(foobarNowPlayingAnnouncerThread, &QThread::started, foobarNowPlayingAnnouncer, &FoobarNowPlayingAnnouncer::run);
+    connect(foobarNowPlayingAnnouncer, &FoobarNowPlayingAnnouncer::newTrack, this, [&](QString artist, QString title) {
+        qDebug() << "newTrack handler called with" << artist << "-" << title;
+    });
+
+    foobarNowPlayingAnnouncerThread->start();
+
     resize(300, 500);
 
     QDesktopWidget dw;

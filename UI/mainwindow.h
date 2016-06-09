@@ -6,8 +6,10 @@
 #include "UI/lyricdownloaderwindow.h"
 #include "UI/manualdownloaderwindow.h"
 #include "UI/configdialog.h"
+#include "Misc/foobarnowplayingannouncer.h"
 #include <QMenuBar>
 #include <QPlainTextEdit>
+#include <QThread>
 
 class ReverseSearchModel;
 
@@ -21,6 +23,8 @@ class MainWindow : public QMainWindow
     QPlainTextEdit *lyricsTextEdit = nullptr;
     ManualDownloaderWindow *manualDownloaderWindow = nullptr;
     ConfigDialog *configDialog = nullptr;
+    FoobarNowPlayingAnnouncer *foobarNowPlayingAnnouncer = nullptr;
+    QThread *foobarNowPlayingAnnouncerThread = nullptr;
 
     QMenuBar *menuBar = nullptr;
     QMenu *fileMenu = nullptr;

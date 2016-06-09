@@ -39,7 +39,8 @@ SOURCES +=\
     Misc/track.cpp \
     Models/lyricdownloaderworker.cpp \
     Models/lyricfetcher.cpp \
-    Models/reversesearchmodel.cpp
+    Models/reversesearchmodel.cpp \
+    Misc/foobarnowplayingannouncer.cpp
 
 HEADERS  += \
     UI/reversesearchwindow.h \
@@ -57,7 +58,8 @@ HEADERS  += \
     Misc/application.h \
     Models/lyricdownloaderworker.h \
     Models/lyricfetcher.h \
-    Models/reversesearchmodel.h
+    Models/reversesearchmodel.h \
+    Misc/foobarnowplayingannouncer.h
 
 INCLUDEPATH += taglib-1.11
 INCLUDEPATH += taglib-1.11/taglib
