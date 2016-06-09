@@ -31,7 +31,6 @@ class LyricDownloaderWorker : public QObject
 public:
     explicit LyricDownloaderWorker(const QList<QPair<int, QString>> &files, bool overwrite, QObject *parent = 0);
 
-    void fetchFinished(QString lyrics, FetchResult result);
 signals:
     void finished();
     void aborted(int lastProcessedIndex);
@@ -40,6 +39,9 @@ signals:
 public slots:
     void process();
     void abort();
+
+protected:
+    void fetchFinished(QString lyrics, FetchResult result);
 };
 
 #endif // LYRICDOWNLOADERWORKER_H

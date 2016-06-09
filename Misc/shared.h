@@ -14,13 +14,13 @@ enum class FetchResult {
     NoMatch
 };
 
-enum Roles {
-    LyricStatusRole = Qt::UserRole,          // Stores the shared_ptr<IndexedObject> represented by a list item
-    LyricsRole = Qt::UserRole + 1,
-    PathRole = Qt::UserRole + 2,        // Stores an unmodified path, in cases where the DisplayRole might differ
-};
-
 Q_DECLARE_METATYPE(FetchResult)
+
+enum Roles {
+    LyricStatusRole = Qt::UserRole,   // Stores the shared_ptr<IndexedObject> represented by a list item
+    LyricsRole = Qt::UserRole + 1,    // Stores lyrics to a track
+    PathRole = Qt::UserRole + 2,      // Stores an unmodified path, in cases where the DisplayRole might differ
+};
 
 // Represents a file path to index. An array of these describes the list of locations to search for files and folders.
 struct Path
@@ -52,6 +52,7 @@ QString joinPath(QString part, Types... rest) {
     return part + "/" + joinPath(rest...);
 }
 
+// Defined in shared.cpp
 QString simplifiedRepresentation(const QString &source);
 QString lyricsForFile(const QString &path);
 bool setLyricsForFile(const QString &path, const QString &lyrics);

@@ -33,15 +33,13 @@ class MainWindow : public QMainWindow
     QMenu *fileMenu = nullptr;
     QMenu *editMenu = nullptr;
     QMenu *lyricsMenu = nullptr;
+
 public:
     explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow() {}
+protected:
     void trackChanged(QString artist, QString title, QString path);
     void closeEvent(QCloseEvent *closeEvent) override;
-    ~MainWindow() {}
-
-signals:
-
-public slots:
 };
 
 #endif // MAINWINDOW_H

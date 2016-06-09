@@ -29,6 +29,7 @@ public:
     ReverseSearchWindow(QWidget *parent = 0);
     void checkIndex();
     ~ReverseSearchWindow() {}
+
 protected:
     void searchStringUpdated(QString newString);
 };

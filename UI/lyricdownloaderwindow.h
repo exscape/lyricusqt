@@ -37,11 +37,11 @@ class LyricDownloaderWindow : public QWidget
     
 public:
     explicit LyricDownloaderWindow(QWidget *parent = 0);
-    bool eventFilter(QObject *target, QEvent *event);
 
-    void progressUpdate(int index, LyricStatus status);
 protected:
+    void progressUpdate(int index, LyricStatus status);
     void startButtonClicked();
+    bool eventFilter(QObject *target, QEvent *event);
     void dragEnterEvent(QDragEnterEvent *e) override;
     void dropEvent(QDropEvent *e) override;
     void closeEvent(QCloseEvent *e) override;

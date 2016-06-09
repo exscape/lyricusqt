@@ -23,8 +23,8 @@ class ManualDownloaderWindow : public QDialog
 
 public:
     ManualDownloaderWindow();
-
     void fetchLyrics(QString artist, QString title);
+
 signals:
     void fetchStarted(QString artist, QString title);
     void fetchComplete(QString artist, QString title, QString lyrics, FetchResult result);

@@ -42,9 +42,10 @@ class ConfigDialog : public QDialog
 
 public:
     ConfigDialog(QWidget *parent);
-
     void loadSettings();
     bool saveSettings();
+
+protected:
     void addPath();
     void editPath();
     void removePath();

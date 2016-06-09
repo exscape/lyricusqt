@@ -3,7 +3,6 @@
 
 #include "Sites/lyricsite.h"
 #include <functional>
-#include <tuple>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QHash>
 #include <QPair>
@@ -14,11 +13,11 @@ class DarkLyricsSite : public LyricSite
 public:
     DarkLyricsSite();
     void fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback) override;
+    QString siteName() override { return "DarkLyrics"; }
 private:
-    std::tuple<QString, FetchResult> getArtistURL(const QString &_artist) const;
+    QPair<QString, FetchResult> getArtistURL(const QString &_artist) const;
     void artistPageResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
     void lyricsPageResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
-    QString siteName() override { return "DarkLyrics"; }
 
     QNetworkAccessManager accessManager;
     QHash<QPair<QString, QString>, QUrl> titleURLCache;

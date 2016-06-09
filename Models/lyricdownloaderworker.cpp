@@ -13,8 +13,8 @@ void LyricDownloaderWorker::fetchFinished(QString lyrics, FetchResult result) {
 
     if (result == FetchResult::Success) {
         // Save lyrics
-//      if (setLyricsForFile(path, lyrics)) {
-        if (true) {
+        if (setLyricsForFile(path, lyrics)) {
+//      if (true) {
             // Success
             emit updateProgress(listIndex, LyricStatus::LyricsDownloaded);
             qDebug() << "LyricDownloadWorker::fetchFinished: saved lyrics to" << path;

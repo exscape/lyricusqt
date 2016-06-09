@@ -48,7 +48,9 @@ void DarkLyricsSite::fetchLyrics(const QString &artist, const QString &title, st
 
     QString artistURL;
     FetchResult result;
-    std::tie(artistURL, result) = getArtistURL(artist);
+    auto tmp = getArtistURL(artist);
+    artistURL = tmp.first;
+    result = tmp.second;
     if (artistURL.length() < 1 || result != FetchResult::Success) {
         callback({}, result);
         return;
@@ -63,7 +65,7 @@ void DarkLyricsSite::fetchLyrics(const QString &artist, const QString &title, st
     });
 }
 
-std::tuple<QString, FetchResult> DarkLyricsSite::getArtistURL(const QString &_artist) const {
+QPair<QString, FetchResult> DarkLyricsSite::getArtistURL(const QString &_artist) const {
     // These URLs have a simple format, so we can figure them out instead of having to
     // fetch and parse HTML. Nice and speedy!
     //
@@ -73,12 +75,12 @@ std::tuple<QString, FetchResult> DarkLyricsSite::getArtistURL(const QString &_ar
     artist = artist.toLower().replace(QRegularExpression("[^A-Za-z0-9]"), "");
 
     if (artist.length() < 1)
-        return std::make_tuple(QString(), FetchResult::InvalidRequest);
+        return { QString(), FetchResult::InvalidRequest };
 
     if (artist[0].isDigit())
-        return std::make_tuple(QString("http://www.darklyrics.com/19/%1.html").arg(artist), FetchResult::Success);
+        return  { QString("http://www.darklyrics.com/19/%1.html").arg(artist), FetchResult::Success };
     else
-        return std::make_tuple(QString("http://www.darklyrics.com/%1/%2.html").arg(QString(artist[0]), artist), FetchResult::Success);
+        return  { QString("http://www.darklyrics.com/%1/%2.html").arg(QString(artist[0]), artist), FetchResult::Success };
 }
 
 void DarkLyricsSite::artistPageResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply) {

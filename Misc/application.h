@@ -27,11 +27,6 @@ public:
     static void resetSetting(const QString &key);
     static void resetAllSettings();
     static void writeSettings();
-
-//signals:
-//public slots:
-//protected slots:
-//    void indexerTimerElapsed();
 };
 
 #endif // APPLICATION_H
