@@ -34,7 +34,7 @@ void DarkLyricsSite::fetchLyrics(const QString &artist, const QString &title, st
     // OK, so the faster cache failed; let's try the second-best thing.
     if (titleURLCache.contains({simplifiedArtist, simplifiedTitle})) {
         QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
-        qDebug() << "URL was cached!" << artist << "-" << title << "==>" << url;
+//      qDebug() << "URL was cached!" << artist << "-" << title << "==>" << url;
         QNetworkRequest networkRequest(url);
         QNetworkReply *reply = accessManager.get(networkRequest);
         QObject::connect(reply, &QNetworkReply::finished, [=] {

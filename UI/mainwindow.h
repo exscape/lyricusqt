@@ -26,6 +26,9 @@ class MainWindow : public QMainWindow
     FoobarNowPlayingAnnouncer *foobarNowPlayingAnnouncer = nullptr;
     QThread *foobarNowPlayingAnnouncerThread = nullptr;
 
+    QString fetchArtist;
+    QString fetchTitle;
+
     QMenuBar *menuBar = nullptr;
     QMenu *fileMenu = nullptr;
     QMenu *editMenu = nullptr;

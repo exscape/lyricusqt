@@ -22,7 +22,7 @@ void SongmeaningsSite::fetchLyrics(const QString &artist, const QString &title, 
     if (titleURLCache.contains({simplifiedArtist, simplifiedTitle})) {
         // Nice. That means we can set up a request for the lyrics, instead of searching for the artist.
         QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
-        qDebug() << "URL was cached!" << artist << "-" << title << "==>" << url;
+//      qDebug() << "URL was cached!" << artist << "-" << title << "==>" << url;
         QNetworkRequest networkRequest(url);
         networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
         QNetworkReply *reply = accessManager.get(networkRequest);

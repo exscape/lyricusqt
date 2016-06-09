@@ -40,15 +40,15 @@ void ManualDownloaderWindow::fetchLyrics(QString artist, QString title) {
 
     lyricFetcher->fetchLyrics(artist, title, [=](const QString &lyrics, FetchResult result) {
         if (result == FetchResult::Success)
-            emit fetchComplete(lyrics, result);
+            emit fetchComplete(artist, title, lyrics, result);
         else if (result == FetchResult::NoMatch)
-            emit fetchComplete(QString("No results for %1 - %2").arg(artist, title), result);
+            emit fetchComplete(artist, title, QString("No results for %1 - %2").arg(artist, title), result);
         else if (result == FetchResult::ConnectionFailed || result == FetchResult::RequestFailed)
-            emit fetchComplete("A connection error/site error occured.", result);
+            emit fetchComplete(artist, title, "A connection error/site error occured.", result);
         else if (result == FetchResult::ParsingFailed)
-            emit fetchComplete("A parse error occurred. This is probably because of a site change; this software needs to be updated.", result);
+            emit fetchComplete(artist, title, "A parse error occurred. This is probably because of a site change; this software needs to be updated.", result);
         else
-            emit fetchComplete("An error occured.", result);
+            emit fetchComplete(artist, title, "An error occured.", result);
     });
 
 }

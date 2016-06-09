@@ -33,16 +33,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     manualDownloaderWindow->setModal(true);
 
     connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchStarted, [this](QString artist, QString title) {
-        qDebug() << "fetchStarted";
+        fetchArtist = artist;
+        fetchTitle = title;
+ //     qDebug() << "fetchStarted";
         lyricsTextEdit->setPlainText(QString("Attempting to fetch lyrics for %1 - %2, please wait...").arg(artist, title));
+        setWindowTitle(QString("%1 - %2").arg(artist, title));
         manualDownloaderWindow->close();
     });
 
-    connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchComplete, [this](QString lyrics, FetchResult result) {
+    connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchComplete, [this](QString artist, QString title, QString lyrics, FetchResult result) {
         // No need to check for errors, as "lyrics" contains an error message in that case -- which we want to display.
-        qDebug() << "fetchComplete w/ lyrics: " << lyrics.left(40) << "...";
-        lyricsTextEdit->setPlainText(lyrics);
-        Q_UNUSED(result);
+//      qDebug() << "fetchComplete w/ lyrics: " << lyrics.left(40) << "...";
+        if (artist == fetchArtist && title == fetchTitle)
+            lyricsTextEdit->setPlainText(lyrics);
+        else
+            qDebug() << "Ignoring result for old request" << artist << "-" << title;
+        if (lyrics.length() == 0 || result != FetchResult::Success)
+            setWindowTitle("Lyricus");
     });
 
     lyricsMenu->addAction("&Manual download", this, [&] {
@@ -61,6 +68,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         }
         reverseSearchWindow->show();
         reverseSearchWindow->setFocus();
+
+        // This is a bit of a hack, and should really be done in ReverseSearchWindow, when the window opens.
+        // I'm not sure how to do that, though; showEvent isn't good enough, as that runs too often, e.g.
+        // when the window is un-minimized. It should only run when the window is *opened*, so this will have
+        // to do, for now.
         reverseSearchWindow->checkIndex();
     });
 
@@ -85,18 +97,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
 void MainWindow::trackChanged(QString artist, QString title, QString path) {
     // Called when the currently playing track changes, and we need to update the display
-    qDebug() << "trackChanged handler called with" << artist << "-" << title << "at" << path;
 
-//    QString lyrics = lyricsForFile(path);
-    QString lyrics;
+    QString lyrics = lyricsForFile(path);
     if (lyrics.length() > 0) {
         lyricsTextEdit->setPlainText(lyrics);
         setWindowTitle(QString("%1 - %2").arg(artist, title));
 
+        // Set so that any previous fetch that still hasn't finished won't overwrite the lyrics when it DOES finish.
+        // Since these don't match the artist/title of that previous fetch, the result will be thrown away, leaving
+        // this one be.
+        fetchArtist = artist;
+        fetchTitle = title;
+
         return;
     }
-    manualDownloaderWindow->fetchLyrics(artist, title);
     setWindowTitle("Lyricus");
+    manualDownloaderWindow->fetchLyrics(artist, title);
 }
 
 void MainWindow::closeEvent(QCloseEvent *closeEvent) {

@@ -22,7 +22,7 @@ void AZLyricsSite::fetchLyrics(const QString &artist, const QString &title, std:
     if (titleURLCache.contains({simplifiedArtist, simplifiedTitle})) {
         // We had the URL cached, so we don't have to search for the artist, and all that!
         QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
-        qDebug() << "URL was cached!" << artist << "-" << title << "==>" << url;
+//      qDebug() << "URL was cached!" << artist << "-" << title << "==>" << url;
         QNetworkRequest networkRequest(url);
         networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
         QNetworkReply *reply = accessManager.get(networkRequest);
