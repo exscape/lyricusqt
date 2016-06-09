@@ -72,7 +72,6 @@ bool setLyricsForFile(const QString &path, const QString &lyrics) {
 
         TagLib::ID3v2::FrameList frames = id3v2tag->frameListMap()["USLT"];
         if (frames.isEmpty()) {
-            qDebug() << "No USLT frame found; creating one";
             auto *frame = new TagLib::ID3v2::UnsynchronizedLyricsFrame;
             frame->setLanguage("eng");
             id3v2tag->addFrame(frame);

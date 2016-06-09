@@ -29,7 +29,7 @@ void FoobarNowPlayingAnnouncer::run() {
     while (true) {
 restart_loop:
         if (!initial_run) {
-            QThread::sleep(4);
+            QThread::sleep(5);
         }
         else
             initial_run = false;

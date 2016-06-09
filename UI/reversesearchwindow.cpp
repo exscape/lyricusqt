@@ -64,7 +64,7 @@ ReverseSearchWindow::ReverseSearchWindow(QWidget *parent) : QWidget(parent) {
 
     results->setIndentation(0);
     results->setColumnCount(2);
-    results->setHeaderLabels({ "Artist"/*, "Album"*/, "Title" });
+    results->setHeaderLabels({ "Artist", "Title" });
     results->header()->setStretchLastSection(true);
     results->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     results->header()->setMinimumSectionSize(75);
@@ -80,7 +80,9 @@ ReverseSearchWindow::ReverseSearchWindow(QWidget *parent) : QWidget(parent) {
         lyricDisplay->setPlainText(lyricData);
         lyricDisplay->setFocus();
 
-        // Highlight all occurances of the search string
+        //
+        // Highlight all occurrences of the search string
+        //
 
         QTextCharFormat fmt;
         fmt.setBackground(QColor(255, 127, 0));
@@ -130,7 +132,7 @@ void ReverseSearchWindow::searchStringUpdated(QString newString) {
 
     QList<QTreeWidgetItem*> items;
     for (const Track &track : data) {
-        auto *item = new QTreeWidgetItem({ track.artist/*, track.album*/, track.title });
+        auto *item = new QTreeWidgetItem({ track.artist, track.title });
         item->setData(0, LyricsRole, track.lyrics);
         items.append(item);
     }

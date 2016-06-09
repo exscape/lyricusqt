@@ -10,15 +10,6 @@
 #include "UI/mainwindow.h"
 #include "Misc/application.h"
 
-/*
-#ifdef Q_OS_MAC
-#include <objc/objc.h>
-#include <objc/message.h>
-void setupDockClickHandler();
-bool dockClickHandler(id self,SEL _cmd,...);
-#endif
-*/
-
 QMap<QString, QVariant> Application::_settings;
 QMap<QString, QVariant> Application::_defaultSettings;
 QReadWriteLock Application::rwLock;
@@ -67,28 +58,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv) {
     // of that. With this it works, without this it doesn't!
     qRegisterMetaTypeStreamOperators<QVector<QPair<bool, QString>>>("QVector<QPair<bool, QString>>");
 
-/*
-#ifdef Q_OS_MAC
-    setupDockClickHandler();
-#endif
-*/
-
     //
     // Set up the default settings
     //
 
-    /*
-    _defaultSettings.insert("activationHotkey", QKeySequence(Qt::ALT + Qt::Key_Space));
-
-    _defaultSettings.insert("displayResultIcons", true);
-    _defaultSettings.insert("displayActionIcons", true);
-    _defaultSettings.insert("resultsIconSize", 28);
-    _defaultSettings.insert("actionsIconSize", 28);
-    */
-
-    //
-    // Files/folders page
-    //
     const QString home = QDir::homePath();
     QVector<Path> pathsToIndex = {
                                    { joinPath(home, "Music"), 10 },
@@ -96,6 +69,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv) {
     _defaultSettings.insert("pathsToIndex", QVariant::fromValue(pathsToIndex));
 
     // Stored as a pair, <siteEnabled, siteName>
+    // The vector order is the site priority order, so the default is Songmeanings first, AZLyrics second, and DarkLyrics disabled.
     _defaultSettings.insert("sitePriority", QVariant::fromValue(QVector<QPair<bool, QString>>({ { true, "Songmeanings" }, { true, "AZLyrics" }, { false, "DarkLyrics" } })));
 
     /*
@@ -152,37 +126,3 @@ void Application::writeSettings() {
     qs.setValue("settings", _settings);
     qs.sync();
 }
-
-/*
-#ifdef Q_OS_MAC
-void setupDockClickHandler() {
-    Class cls = objc_getClass("NSApplication");
-    objc_object *appInst = objc_msgSend((id)cls, sel_registerName("sharedApplication"));
-
-    if(appInst != NULL) {
-        objc_object* delegate = objc_msgSend(appInst, sel_registerName("delegate"));
-        Class delClass = (Class)objc_msgSend(delegate,  sel_registerName("class"));
-        SEL shouldHandle = sel_registerName("applicationShouldHandleReopen:hasVisibleWindows:");
-        if (class_getInstanceMethod(delClass, shouldHandle)) {
-            if (class_replaceMethod(delClass, shouldHandle, (IMP)dockClickHandler, "B@:"))
-                qDebug() << "Registered dock click handler (replaced original method)";
-            else
-                qWarning() << "Failed to replace method for dock click handler";
-        }
-        else {
-            if (class_addMethod(delClass, shouldHandle, (IMP)dockClickHandler,"B@:"))
-                qDebug() << "Registered dock click handler";
-            else
-                qWarning() << "Failed to register dock click handler";
-        }
-    }
-}
-
-bool dockClickHandler(id self,SEL _cmd,...) {
-    Q_UNUSED(self)
-    Q_UNUSED(_cmd)
-    static_cast<Application*>(qApp)->mainWindow->hotkeyPressed();
-    return false;
-}
-#endif
-*/

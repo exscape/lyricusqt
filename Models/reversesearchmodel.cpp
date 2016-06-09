@@ -53,9 +53,6 @@ ReverseSearchModel::ReverseSearchModel() {
 void ReverseSearchModel::indexFile(const QString &path) {
     QString artist, title, album;
     {
-        // For some reason, The MPEG::File open below fails if this is still open.
-        // Additionally, there doesn't seem to be a close() method, so we'll have to
-        // abuse scope a bit to get the file to close when we're done reading the tags.
         TagLib::FileRef f(QFile::encodeName(path).constData());
         if (f.isNull()) {
             qDebug() << "Open failed for" << path << ", ignoring...";

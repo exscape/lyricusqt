@@ -17,7 +17,6 @@ LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QWidget(parent) 
     fileList->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     fileList->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     fileList->header()->setStretchLastSection(true);
-//  fileList->model()->setHeaderData(0, Qt::Horizontal, Qt::AlignCenter, Qt::TextAlignmentRole);
     fileList->setSelectionMode(QAbstractItemView::ExtendedSelection);
     fileList->installEventFilter(this);
 
@@ -31,7 +30,7 @@ LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QWidget(parent) 
     overwriteLyricsCheckBox = new QCheckBox("Download and overwrite lyrics for files that already have them");
     progressBar = new QProgressBar;
     progressBar->setMinimum(0);
-    progressBar->setMaximum(10);
+    progressBar->setMaximum(1);
     progressBar->setValue(0);
     progressBar->setTextVisible(false);
 
@@ -283,8 +282,6 @@ void LyricDownloaderWindow::addFilesRecursively(const QString &sDir, int max_dep
     QFileInfoList list = dir.entryInfoList(dir.nameFilters(), QDir::AllEntries | QDir::NoDotAndDotDot);
 
     for (QFileInfo info : list) {
-//        if (Application::shouldTerminate)
-//            return {};
         QString sFilePath = info.filePath();
         QString absPath = info.absoluteFilePath();
 

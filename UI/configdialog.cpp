@@ -14,11 +14,9 @@ ConfigDialog::ConfigDialog(QWidget *parent) : QDialog(parent) {
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     siteTreeWidget = new QTreeWidget;
-
     siteHintLabel = new QLabel("Drag/drop sites to change priority");
     siteTreeGroup = new QGroupBox("Site priority");
     siteTreeVbox = new QVBoxLayout;
-    siteTreeWidget = new QTreeWidget(this);
 
     vbox = new QVBoxLayout;
     hbox = new QHBoxLayout;
@@ -66,9 +64,9 @@ ConfigDialog::ConfigDialog(QWidget *parent) : QDialog(parent) {
     editButton->setDisabled(true);
     removeButton->setDisabled(true);
 
-    connect(addButton, &QPushButton::released, this, &ConfigDialog::addPath);
-    connect(editButton, &QPushButton::released, this, &ConfigDialog::editPath);
-    connect(removeButton, &QPushButton::released, this, &ConfigDialog::removePath);
+    connect(addButton, &QPushButton::clicked, this, &ConfigDialog::addPath);
+    connect(editButton, &QPushButton::clicked, this, &ConfigDialog::editPath);
+    connect(removeButton, &QPushButton::clicked, this, &ConfigDialog::removePath);
 
     QHBoxLayout *buttonsHBox = new QHBoxLayout;
     buttonsHBox->addStretch(1);

@@ -1,9 +1,10 @@
 #include "Models/lyricdownloaderworker.h"
 #include "Misc/shared.h"
 
-// Note that this constructor COPIES filesToProcess, to avoid having to share data
-// between threads.
-LyricDownloaderWorker::LyricDownloaderWorker(const QList<QPair<int, QString>> &files, bool overwrite, QObject *parent) : QObject(parent), overwriteLyrics(overwrite), filesToProcess(files) {
+// Note that this constructor COPIES filesToProcess, to avoid having to share data between threads.
+LyricDownloaderWorker::LyricDownloaderWorker(const QList<QPair<int, QString>> &files, bool overwrite, QObject *parent)
+    : QObject(parent), overwriteLyrics(overwrite), filesToProcess(files)
+{
     qRegisterMetaType<LyricStatus>("LyricStatus");
 }
 
