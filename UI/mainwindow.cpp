@@ -1,4 +1,4 @@
-#include "Misc/Application.h"
+#include "Misc/application.h"
 #include "UI/mainwindow.h"
 #include <QDesktopWidget>
 
@@ -81,6 +81,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setCentralWidget(lyricsTextEdit);
     lyricsTextEdit->setReadOnly(true);
 
+#ifdef Q_OS_WIN
     foobarNowPlayingAnnouncer = new FoobarNowPlayingAnnouncer;
     foobarNowPlayingAnnouncerThread = new QThread;
     foobarNowPlayingAnnouncer->moveToThread(foobarNowPlayingAnnouncerThread);
@@ -88,6 +89,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(foobarNowPlayingAnnouncer, &FoobarNowPlayingAnnouncer::newTrack, this, &MainWindow::trackChanged);
 
     foobarNowPlayingAnnouncerThread->start();
+#endif
 
     setWindowTitle("Lyricus");
 }

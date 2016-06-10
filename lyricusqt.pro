@@ -14,6 +14,8 @@ TEMPLATE = app
 
 win32 {
     LIBS += $$PWD/taglib-1.11/taglib-release/taglib.dll
+    SOURCES += Misc/foobarnowplayingannouncer.cpp
+    HEADERS += Misc/foobarnowplayingannouncer.h
 }
 
 unix {
@@ -39,8 +41,7 @@ SOURCES +=\
     Misc/track.cpp \
     Models/lyricdownloaderworker.cpp \
     Models/lyricfetcher.cpp \
-    Models/reversesearchmodel.cpp \
-    Misc/foobarnowplayingannouncer.cpp
+    Models/reversesearchmodel.cpp
 
 HEADERS  += \
     UI/reversesearchwindow.h \
@@ -58,8 +59,7 @@ HEADERS  += \
     Misc/application.h \
     Models/lyricdownloaderworker.h \
     Models/lyricfetcher.h \
-    Models/reversesearchmodel.h \
-    Misc/foobarnowplayingannouncer.h
+    Models/reversesearchmodel.h
 
 INCLUDEPATH += taglib-1.11
 INCLUDEPATH += taglib-1.11/taglib
