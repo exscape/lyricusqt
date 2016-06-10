@@ -1,6 +1,5 @@
 *-debug
 *-release
 *.pro.user
-taglib-1.*
 test_data
 TODO.txt
