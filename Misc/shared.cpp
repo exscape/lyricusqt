@@ -4,6 +4,8 @@
 #include <taglib/mpeg/id3v2/frames/unsynchronizedlyricsframe.h>
 #include <taglib/mpeg/id3v2/id3v2tag.h>
 #include <taglib/mp4/mp4file.h>
+#include <taglib/flac/flacfile.h>
+#include <taglib/toolkit/tpropertymap.h>
 #include <QFile>
 #include <QFileInfo>
 #include <QDebug>
@@ -55,6 +57,19 @@ QString lyricsForFile(const QString &path) {
         else
             return {};
     }
+    else if (info.suffix().toLower() == "flac") {
+        TagLib::FLAC::File file(QFile::encodeName(path).constData());
+        if (!file.isOpen() || !file.isValid())
+            return {};
+
+        TagLib::PropertyMap propertyMap = file.properties();
+        if (propertyMap.contains("LYRICS")) {
+            TagLib::StringList strings = propertyMap["LYRICS"];
+            if (!strings.isEmpty()) {
+                return TStringToQString(strings.front());
+            }
+        }
+    }
 
     return {};
 }
@@ -102,6 +117,27 @@ bool setLyricsForFile(const QString &path, const QString &lyrics) {
             return {};
 
         file.tag()->itemListMap()["\xa9lyr"] = TagLib::StringList(QStringToTString(lyrics));
+
+        return file.save();
+    }
+    else if (info.suffix().toLower() == "flac") {
+        TagLib::FLAC::File file(QFile::encodeName(path).constData());
+        if (!file.isOpen() || !file.isValid())
+            return {};
+
+        TagLib::PropertyMap propertyMap = file.properties();
+
+        TagLib::StringList strings;
+        if (propertyMap.contains("LYRICS") && !propertyMap["LYRICS"].isEmpty()) {
+            // In the (probably *very*) rare case there are multiple LYRICS tags, attempt to keep all but the first.
+            strings = propertyMap["LYRICS"];
+            strings[0] = QStringToTString(lyrics);
+            propertyMap["LYRICS"] = strings;
+        }
+        else
+            propertyMap["LYRICS"] = TagLib::StringList(QStringToTString(lyrics));
+
+        file.setProperties(propertyMap);
 
         return file.save();
     }

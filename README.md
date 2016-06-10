@@ -8,7 +8,7 @@ It is still in its early stages, but the following basic functionality is there 
 * Display lyrics to the current track in foobar2000 (support for other players is planned)
 * Download lyrics to any number of tracks at once
 * Index and search by lyrics to find (local) tracks that contain them
-* Support for .mp3 and .m4a file formats (others are planned, e.g. FLAC, APE)
+* Support for .mp3, .m4a and FLAC file formats
 * Support for AZLyrics, Darklyrics and Songmeanings
 
 

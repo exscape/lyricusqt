@@ -64,7 +64,7 @@ LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QWidget(parent) 
 
     connect(addFilesButton, &QPushButton::clicked, [&] {
         QFileDialog fileDialog;
-        fileDialog.setNameFilter("Supported files (*.mp3 *.m4a);;MP3 files (*.mp3);;M4A files (*.m4a)");
+        fileDialog.setNameFilter("Supported files (*.mp3 *.m4a *.flac);;MP3 files (*.mp3);;M4A files (*.m4a);;FLAC files (*.flac)");
         fileDialog.setFileMode(QFileDialog::ExistingFiles);
         if (fileDialog.exec()) {
             if (fileDialog.selectedFiles().length() > 0)
@@ -219,7 +219,7 @@ void LyricDownloaderWindow::dragEnterEvent(QDragEnterEvent *e) {
     if (workerThread && workerThread->isRunning())
         return;
 
-    // If at least one of the files dragged inside is an MP3 file, an M4A file, or a folder, accept the drop.
+    // If at least one of the files dragged inside is a supported file type or a folder, accept the drop.
     // If not, deny it.
     // This means we might get a folder full of JPEG files, but we can't recursively check everything here,
     // or the UI will be laggy like all hell when big folders are dragged.
@@ -227,7 +227,7 @@ void LyricDownloaderWindow::dragEnterEvent(QDragEnterEvent *e) {
     for (const QUrl &url : e->mimeData()->urls()) {
         QString local = url.toLocalFile();
         QFileInfo fileInfo(local);
-        if (fileInfo.isDir() || fileInfo.suffix().toLower() == "mp3" || fileInfo.suffix().toLower() == "m4a") {
+        if (fileInfo.isDir() || fileInfo.suffix().toLower() == "mp3" || fileInfo.suffix().toLower() == "m4a" || fileInfo.suffix().toLower() == "flac") {
             e->acceptProposedAction();
             return;
         }
@@ -235,11 +235,10 @@ void LyricDownloaderWindow::dragEnterEvent(QDragEnterEvent *e) {
 }
 
 void LyricDownloaderWindow::dropEvent(QDropEvent *e) {
-    QStringList types = { "mp3", "m4a" };
     for (const QUrl &url : e->mimeData()->urls()) {
         QString local = url.toLocalFile();
         QFileInfo fileInfo(local);
-        if (fileInfo.suffix().toLower() == "mp3" || fileInfo.suffix().toLower() == "m4a") {
+        if (fileInfo.suffix().toLower() == "mp3" || fileInfo.suffix().toLower() == "m4a" || fileInfo.suffix().toLower() == "flac") {
             addFile(local);
         }
         else if (fileInfo.isDir()) {
@@ -285,7 +284,7 @@ void LyricDownloaderWindow::addFilesRecursively(const QString &sDir, int max_dep
         QString sFilePath = info.filePath();
         QString absPath = info.absoluteFilePath();
 
-        if (absPath.endsWith(".mp3", Qt::CaseInsensitive)|| absPath.endsWith(".m4a", Qt::CaseInsensitive)) {
+        if (absPath.endsWith(".mp3", Qt::CaseInsensitive)|| absPath.endsWith(".m4a", Qt::CaseInsensitive) || absPath.endsWith(".flac", Qt::CaseInsensitive)) {
             addFile(absPath);
         }
 
