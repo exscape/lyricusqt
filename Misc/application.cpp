@@ -72,14 +72,14 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv) {
     // The vector order is the site priority order, so the default is Songmeanings first, AZLyrics second, and DarkLyrics disabled.
     _defaultSettings.insert("sitePriority", QVariant::fromValue(QVector<QPair<bool, QString>>({ { true, "Songmeanings" }, { true, "AZLyrics" }, { false, "DarkLyrics" } })));
 
-    /*
-    // Use the default size, which is calculated based on screen resolution, if the user hasn't resized the window to override this
-    _defaultSettings.insert("mainWindowSize", QSize(0, 0));
-    */
-
     // Load settings from disk
     QSettings qs;
     _settings = qs.value("settings").toMap();
+}
+
+bool Application::hasSetting(const QString &key) {
+    QReadLocker locker(&rwLock);
+    return (_settings.contains(key) || _defaultSettings.contains(key));
 }
 
 QVariant Application::getSetting(const QString &key) {

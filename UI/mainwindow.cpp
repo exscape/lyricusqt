@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     fileMenu->addSeparator();
     fileMenu->addAction("E&xit", this, [&] { QApplication::quit(); }, QKeySequence::Quit);
 
-    manualDownloaderWindow = new ManualDownloaderWindow;
+    manualDownloaderWindow = new ManualDownloaderWindow(this);
     manualDownloaderWindow->setModal(true);
 
     connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchStarted, [this](QString artist, QString title) {
@@ -53,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     });
 
     lyricsMenu->addAction("&Manual download", this, [&] {
+        manualDownloaderWindow->setArtistAndTitle(mostRecentArtist, mostRecentTitle);
         manualDownloaderWindow->exec();
     });
 
@@ -88,15 +89,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     foobarNowPlayingAnnouncerThread->start();
 
-    resize(300, 500);
-
-    QDesktopWidget dw;
-    move(dw.width() / 2 - width()/2, dw.height() / 2 - height()/2);
     setWindowTitle("Lyricus");
 }
 
 void MainWindow::trackChanged(QString artist, QString title, QString path) {
     // Called when the currently playing track changes, and we need to update the display
+
+    mostRecentArtist = artist;
+    mostRecentTitle = title;
 
     QString lyrics = lyricsForFile(path);
     if (lyrics.length() > 0) {
@@ -116,6 +116,7 @@ void MainWindow::trackChanged(QString artist, QString title, QString path) {
 }
 
 void MainWindow::closeEvent(QCloseEvent *closeEvent) {
+    Application::setSetting("mainWindowGeometry", saveGeometry());
     bool shouldExit = true;
 
     // Don't exit if the downloader is running -- unless the user says "yes" (in which case close() returns true).
@@ -128,4 +129,37 @@ void MainWindow::closeEvent(QCloseEvent *closeEvent) {
         Application::quit();
     else
         closeEvent->ignore(); // Otherwise the main window will close, but the others will live on
+}
+
+void MainWindow::adjustSize() {
+    if (Application::hasSetting("mainWindowGeometry"))
+        restoreGeometry(Application::getSetting("mainWindowGeometry").toByteArray());
+    else {
+        // Use a default value, centered on the screen
+        resize(300, 500);
+        QRect geom = Application::desktop()->availableGeometry();
+        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(), geom));
+
+        /*
+        // Use a default value in the bottom-right corner
+        // I can't get this to work on Windows 10. geometry() is the inner window, so using that
+        // causes the window to be too far right and down.
+        // frameGeometry() is SUPPOSED to be the outer window as far as I understand, but the frame it returns
+        // is bigger than the visible edges of the window, so that leaves a gap between the taskbar/window and right edge/window.
+        // Ugh!
+        QRect geom = Application::desktop()->availableGeometry();
+        QPoint p;
+        qDebug() << "Available geometry is" << geom;
+        qDebug() << "Window geometry is" << geometry();
+        qDebug() << "Frame geometry is" << frameGeometry();
+
+        int windowWidth = frameGeometry().width();
+        int windowHeight = frameGeometry().height();
+
+        p.setX(geom.width() - windowWidth);
+        p.setY(geom.height() - windowHeight);
+
+        move(p);
+        */
+    }
 }

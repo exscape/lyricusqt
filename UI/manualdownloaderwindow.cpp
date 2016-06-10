@@ -1,6 +1,6 @@
 #include "UI/manualdownloaderwindow.h"
 
-ManualDownloaderWindow::ManualDownloaderWindow() {
+ManualDownloaderWindow::ManualDownloaderWindow(QWidget *parent) : QDialog(parent) {
     lyricFetcher = new LyricFetcher;
     gridLayout = new QGridLayout;
     artistLabel = new QLabel("Artist:");
@@ -28,8 +28,15 @@ ManualDownloaderWindow::ManualDownloaderWindow() {
     });
 
     searchButton->setEnabled(false);
-    connect(artistLineEdit, &QLineEdit::textEdited, this, &ManualDownloaderWindow::validateFields);
-    connect(titleLineEdit, &QLineEdit::textEdited, this, &ManualDownloaderWindow::validateFields);
+    connect(artistLineEdit, &QLineEdit::textChanged, this, &ManualDownloaderWindow::validateFields);
+    connect(titleLineEdit, &QLineEdit::textChanged, this, &ManualDownloaderWindow::validateFields);
+
+    setWindowTitle("Lyricus - Manual Download");
+}
+
+void ManualDownloaderWindow::setArtistAndTitle(QString artist, QString title) {
+    artistLineEdit->setText(artist);
+    titleLineEdit->setText(title);
 }
 
 void ManualDownloaderWindow::fetchLyrics(QString artist, QString title) {

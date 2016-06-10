@@ -22,8 +22,9 @@ class ManualDownloaderWindow : public QDialog
     QPushButton *searchButton = nullptr;
 
 public:
-    ManualDownloaderWindow();
+    ManualDownloaderWindow(QWidget *parent = 0);
     void fetchLyrics(QString artist, QString title);
+    void setArtistAndTitle(QString artist, QString title);
 
 signals:
     void fetchStarted(QString artist, QString title);

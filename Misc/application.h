@@ -22,6 +22,7 @@ public:
     void setMainWindow(MainWindow *win) { this->mainWindow = win; }
     ~Application() { writeSettings(); }
 
+    static bool hasSetting(const QString &key);
     static QVariant getSetting(const QString &key);
     static void setSetting(const QString &key, const QVariant &value); // Note: doesn't store results to disk; call writeSettings() when you're done changing settings
     static void resetSetting(const QString &key);

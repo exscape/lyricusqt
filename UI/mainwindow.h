@@ -29,6 +29,10 @@ class MainWindow : public QMainWindow
     QString fetchArtist;
     QString fetchTitle;
 
+    // Set on "now playing" announcements
+    QString mostRecentArtist;
+    QString mostRecentTitle;
+
     QMenuBar *menuBar = nullptr;
     QMenu *fileMenu = nullptr;
     QMenu *editMenu = nullptr;
@@ -36,6 +40,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
+    void adjustSize();
     ~MainWindow() {}
 protected:
     void trackChanged(QString artist, QString title, QString path);
