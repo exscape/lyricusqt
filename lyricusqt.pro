@@ -13,7 +13,7 @@ TARGET = lyricusqt
 TEMPLATE = app
 
 win32 {
-    LIBS += $$PWD/taglib-1.11/taglib-release/taglib.dll
+    LIBS += $$PWD/taglib-1.11.1/taglib-release/taglib.dll
     SOURCES += Misc/foobarnowplayingannouncer.cpp
     HEADERS += Misc/foobarnowplayingannouncer.h
 }
@@ -61,32 +61,32 @@ HEADERS  += \
     Models/lyricfetcher.h \
     Models/reversesearchmodel.h
 
-INCLUDEPATH += taglib-1.11
-INCLUDEPATH += taglib-1.11/taglib
-INCLUDEPATH += taglib-1.11/taglib/ape
-INCLUDEPATH += taglib-1.11/taglib/asf
-INCLUDEPATH += taglib-1.11/taglib/flac
-INCLUDEPATH += taglib-1.11/taglib/it
-INCLUDEPATH += taglib-1.11/taglib/mp4
-INCLUDEPATH += taglib-1.11/taglib/mod
-INCLUDEPATH += taglib-1.11/taglib/mpc
-INCLUDEPATH += taglib-1.11/taglib/mpeg
-INCLUDEPATH += taglib-1.11/taglib/ogg
-INCLUDEPATH += taglib-1.11/taglib/riff
-INCLUDEPATH += taglib-1.11/taglib/s3m
-INCLUDEPATH += taglib-1.11/taglib/toolkit
-INCLUDEPATH += taglib-1.11/taglib/trueaudio
-INCLUDEPATH += taglib-1.11/taglib/wavpack
-INCLUDEPATH += taglib-1.11/taglib/xm
-INCLUDEPATH += taglib-1.11/taglib/mpeg/id3v1
-INCLUDEPATH += taglib-1.11/taglib/mpeg/id3v2
-INCLUDEPATH += taglib-1.11/taglib/mpeg/id3v2/frames
-INCLUDEPATH += taglib-1.11/taglib/ogg/flac
-INCLUDEPATH += taglib-1.11/taglib/ogg/speex
-INCLUDEPATH += taglib-1.11/taglib/ogg/vorbis
-INCLUDEPATH += taglib-1.11/taglib/ogg/opus
-INCLUDEPATH += taglib-1.11/taglib/riff/aiff
-INCLUDEPATH += taglib-1.11/taglib/riff/wav
+INCLUDEPATH += taglib-1.11.1
+INCLUDEPATH += taglib-1.11.1/taglib
+INCLUDEPATH += taglib-1.11.1/taglib/ape
+INCLUDEPATH += taglib-1.11.1/taglib/asf
+INCLUDEPATH += taglib-1.11.1/taglib/flac
+INCLUDEPATH += taglib-1.11.1/taglib/it
+INCLUDEPATH += taglib-1.11.1/taglib/mp4
+INCLUDEPATH += taglib-1.11.1/taglib/mod
+INCLUDEPATH += taglib-1.11.1/taglib/mpc
+INCLUDEPATH += taglib-1.11.1/taglib/mpeg
+INCLUDEPATH += taglib-1.11.1/taglib/ogg
+INCLUDEPATH += taglib-1.11.1/taglib/riff
+INCLUDEPATH += taglib-1.11.1/taglib/s3m
+INCLUDEPATH += taglib-1.11.1/taglib/toolkit
+INCLUDEPATH += taglib-1.11.1/taglib/trueaudio
+INCLUDEPATH += taglib-1.11.1/taglib/wavpack
+INCLUDEPATH += taglib-1.11.1/taglib/xm
+INCLUDEPATH += taglib-1.11.1/taglib/mpeg/id3v1
+INCLUDEPATH += taglib-1.11.1/taglib/mpeg/id3v2
+INCLUDEPATH += taglib-1.11.1/taglib/mpeg/id3v2/frames
+INCLUDEPATH += taglib-1.11.1/taglib/ogg/flac
+INCLUDEPATH += taglib-1.11.1/taglib/ogg/speex
+INCLUDEPATH += taglib-1.11.1/taglib/ogg/vorbis
+INCLUDEPATH += taglib-1.11.1/taglib/ogg/opus
+INCLUDEPATH += taglib-1.11.1/taglib/riff/aiff
+INCLUDEPATH += taglib-1.11.1/taglib/riff/wav
 
 SUBDIRS += \
-    taglib-1.11/taglib/taglib.pro
+    taglib-1.11.1/taglib/taglib.pro

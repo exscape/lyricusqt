@@ -29,7 +29,7 @@ goto theend
 :doit
 if /i "%1#" == "--libs#"    echo -LC:/Program Files (x86)/taglib/lib -llibtag
 if /i "%1#" == "--cflags#"  echo -IC:/Program Files (x86)/taglib/include/taglib
-if /i "%1#" == "--version#" echo 1.11
+if /i "%1#" == "--version#" echo 1.11.1
 if /i "%1#" == "--prefix#"  echo C:/Program Files (x86)/taglib
 
 :theend
