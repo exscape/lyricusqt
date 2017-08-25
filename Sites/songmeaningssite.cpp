@@ -136,7 +136,7 @@ void SongmeaningsSite::lyricsPageResponseHandler(std::function<void (const QStri
     }
 
     QString receivedHTML = QString(reply->readAll());
-    QRegularExpression re(R"##(<div class="holder lyric-box">(.*?)<br\s*/><div)##");
+    QRegularExpression re(R"##(<div class="holder lyric-box">(.*?)<br\s*/?><div)##");
     re.setPatternOptions(re.patternOptions() | QRegularExpression::CaseInsensitiveOption | QRegularExpression::DotMatchesEverythingOption);
     QRegularExpressionMatch match = re.match(receivedHTML);
 

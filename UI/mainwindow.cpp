@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     lyricsMenu->addAction("&Manual download", this, [&] {
         manualDownloaderWindow->setArtistAndTitle(mostRecentArtist, mostRecentTitle);
         manualDownloaderWindow->exec();
-    });
+    }, QKeySequence::New);
 
     lyricsMenu->addAction("&Lyric downloader", this, [&] {
         if (lyricDownloaderWindow == nullptr)

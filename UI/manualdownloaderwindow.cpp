@@ -31,12 +31,16 @@ ManualDownloaderWindow::ManualDownloaderWindow(QWidget *parent) : QDialog(parent
     connect(artistLineEdit, &QLineEdit::textChanged, this, &ManualDownloaderWindow::validateFields);
     connect(titleLineEdit, &QLineEdit::textChanged, this, &ManualDownloaderWindow::validateFields);
 
+
     setWindowTitle("Lyricus - Manual Download");
 }
 
 void ManualDownloaderWindow::setArtistAndTitle(QString artist, QString title) {
     artistLineEdit->setText(artist);
     titleLineEdit->setText(title);
+
+    artistLineEdit->selectAll();
+    artistLineEdit->setFocus();
 }
 
 void ManualDownloaderWindow::fetchLyrics(QString artist, QString title) {
