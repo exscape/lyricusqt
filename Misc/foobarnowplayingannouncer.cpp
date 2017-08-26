@@ -72,11 +72,19 @@ restart_loop:
             if (path.startsWith("file://"))
                 path = path.right(path.length() - 7);
 
-            if (artist.length() > 0 && title.length() > 0)
-                emit newTrack(artist, title, path); // Note that path may be 0 -- though it should never be
+            if (artist.length() > 0 && title.length() > 0) {
+                lastArtist = artist;
+                lastTitle = title;
+                lastPath = path;
+                emit newTrack(artist, title, path); // Note that path may be 0-length -- though it should never be
+            }
         }
     }
 
     // This won't ever be reached... oh well.
     HeapFree(GetProcessHeap(), 0, responseData);
+}
+
+void FoobarNowPlayingAnnouncer::reEmitLastTrack() {
+    emit newTrack(lastArtist, lastTitle, lastPath);
 }

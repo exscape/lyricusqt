@@ -57,6 +57,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         manualDownloaderWindow->exec();
     }, QKeySequence::New);
 
+    lyricsMenu->addAction("&Go to current track", this, [&] {
+        trackChanged(mostRecentArtist, mostRecentTitle, mostRecentTrackPath);
+        if (foobarNowPlayingAnnouncer != nullptr)
+            foobarNowPlayingAnnouncer->reEmitLastTrack();
+    });
+    lyricsMenu->actions()[1]->setEnabled(false);
+
     lyricsMenu->addAction("&Lyric downloader", this, [&] {
         if (lyricDownloaderWindow == nullptr)
             lyricDownloaderWindow = new LyricDownloaderWindow;
@@ -99,6 +106,8 @@ void MainWindow::trackChanged(QString artist, QString title, QString path) {
 
     mostRecentArtist = artist;
     mostRecentTitle = title;
+
+    lyricsMenu->actions()[1]->setEnabled( mostRecentTrackPath.length() > 0 );
 
     QString lyrics = lyricsForFile(path);
     if (lyrics.length() > 0) {

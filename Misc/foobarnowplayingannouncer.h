@@ -2,6 +2,7 @@
 #define FOOBARNOWPLAYINGANNOUNCER_H
 
 #include <QObject>
+#include <QString>
 #include <windows.h>
 
 class FoobarNowPlayingAnnouncer : public QObject
@@ -11,8 +12,13 @@ class FoobarNowPlayingAnnouncer : public QObject
 public:
     explicit FoobarNowPlayingAnnouncer(QObject *parent = 0);
     void run();
+    void reEmitLastTrack();
 signals:
     void newTrack(QString artist, QString title, QString path);
+protected:
+    QString lastArtist;
+    QString lastTitle;
+    QString lastPath;
 };
 
 #endif // FOOBARNOWPLAYINGANNOUNCER_H
