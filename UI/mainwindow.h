@@ -39,6 +39,9 @@ class MainWindow : public QMainWindow
     QString mostRecentTitle;
     QString mostRecentTrackPath;
 
+    // Used when reverting, and to figure out if the lyrics have been edited or not
+    QString originalLyrics;
+
     QMenuBar *menuBar = nullptr;
     QMenu *fileMenu = nullptr;
     QMenu *editMenu = nullptr;
@@ -55,6 +58,7 @@ public:
 protected:
     void trackChanged(QString artist, QString title, QString path);
     void closeEvent(QCloseEvent *closeEvent) override;
+    void save();
 };
 
 #endif // MAINWINDOW_H
