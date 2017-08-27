@@ -37,15 +37,20 @@ class MainWindow : public QMainWindow
     // Set on "now playing" announcements
     QString mostRecentArtist;
     QString mostRecentTitle;
+    QString mostRecentTrackPath;
 
     QMenuBar *menuBar = nullptr;
     QMenu *fileMenu = nullptr;
     QMenu *editMenu = nullptr;
     QMenu *lyricsMenu = nullptr;
 
+    QColor defaultBackgroundColor;
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     void adjustSize();
+    void enterEditMode();
+    void exitEditMode();
     ~MainWindow() {}
 protected:
     void trackChanged(QString artist, QString title, QString path);

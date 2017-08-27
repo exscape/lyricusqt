@@ -1,6 +1,33 @@
 #include "Misc/application.h"
 #include "UI/mainwindow.h"
 #include <QDesktopWidget>
+#include <QMessageBox>
+
+#ifdef Q_OS_WIN
+#include <qt_windows.h>
+#include <QTimer>
+#endif
+
+void MainWindow::enterEditMode() {
+    qDebug() << "Enter edit mode";
+    editMenu->actions()[0]->setText("Exit &edit mode");
+    lyricsTextEdit->setReadOnly(false);
+
+    auto palette = lyricsTextEdit->palette();
+    palette.setColor(QPalette::Base, QColor(255, 220, 220));
+    defaultBackgroundColor = palette.color(QPalette::Base);
+    lyricsTextEdit->setPalette(palette);
+}
+
+void MainWindow::exitEditMode() {
+    qDebug() << "Exit edit mode";
+    editMenu->actions()[0]->setText("Enter &edit mode");
+    lyricsTextEdit->setReadOnly(true);
+
+    auto palette = lyricsTextEdit->palette();
+    palette.setColor(QPalette::Base, Qt::white);
+    lyricsTextEdit->setPalette(palette);
+}
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     qRegisterMetaType<FetchResult>("FetchResult");
@@ -25,9 +52,67 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         configDialog->loadSettings();
         configDialog->exec();
     });
-    fileMenu->addAction("&Save", this, [&] { qDebug() << "Save"; }, QKeySequence::Save);
+    fileMenu->addAction("&Save", this, [&] {
+        qDebug() << "Save";
+
+        if (mostRecentTrackPath.length() > 0) {
+            exitEditMode();
+
+            // On Windows, we can't write to the file if it's open in a music player.
+            // Wait until it's not.
+#ifdef Q_OS_WIN
+            QTimer *saveTimer = new QTimer;
+            saveTimer->setTimerType(Qt::VeryCoarseTimer);
+
+            // Copy this; if we use lyricsTextEdit->toPlainText inside the lambda, it will use the *currently displayed* text when the save occurs.
+            QString lyricsToSave = lyricsTextEdit->toPlainText();
+
+            connect(saveTimer, QTimer::timeout, [this, saveTimer, mostRecentTrackPath = mostRecentTrackPath, lyricsToSave] {
+                saveTimer->setInterval(5000);
+
+                HANDLE ret = CreateFile(mostRecentTrackPath.toStdWString().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+                if (ret == INVALID_HANDLE_VALUE && GetLastError() == ERROR_SHARING_VIOLATION) {
+                    // File is still in use, try again on the next timer timeout
+                    return;
+                }
+                else if (ret == INVALID_HANDLE_VALUE && GetLastError() != ERROR_SHARING_VIOLATION) {
+                    // An error occured, abort and don't try again.
+                    QMessageBox::warning(this, "Unable to save", QString("Unable to write lyrics to file %1.").arg(mostRecentTrackPath), QMessageBox::Ok);
+                }
+                else if (ret != INVALID_HANDLE_VALUE) {
+                    // Open successful, we can save now!
+                    CloseHandle(ret);
+                    if (!setLyricsForFile(mostRecentTrackPath, lyricsToSave)) {
+                        QMessageBox::warning(this, "Unable to save", QString("Unable to write lyrics to file %1.").arg(mostRecentTrackPath), QMessageBox::Ok);
+                    }
+                }
+
+                disconnect(saveTimer);
+                saveTimer->deleteLater();
+            });
+
+            saveTimer->setInterval(0);
+            saveTimer->start();
+        }
+#else
+            if (!setLyricsForFile(mostRecentTrackPath, lyricsTextEdit->toPlainText())) {
+                QMessageBox::warning(this, "Unable to save", QString("Unable to write lyrics to file %1.").arg(mostRecentTrackPath), QMessageBox::Ok);
+            }
+#endif
+
+    }, QKeySequence::Save);
     fileMenu->addSeparator();
     fileMenu->addAction("E&xit", this, [&] { QApplication::quit(); }, QKeySequence::Quit);
+
+    editMenu->addAction("Enter &edit mode", this, [&] {
+        if (lyricsTextEdit->isReadOnly()) {
+            enterEditMode();
+        }
+        else {
+            exitEditMode();
+        }
+    }, Qt::CTRL + Qt::Key_E);
+    editMenu->actions()[0]->setEnabled(false); // Enabled when a local track (with a known path) is played; disabled again on manual search
 
     manualDownloaderWindow = new ManualDownloaderWindow(this);
     manualDownloaderWindow->setModal(true);
@@ -35,10 +120,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchStarted, [this](QString artist, QString title) {
         fetchArtist = artist;
         fetchTitle = title;
+
+        exitEditMode();
+        mostRecentArtist.clear();
+        mostRecentTitle.clear();
+        mostRecentTrackPath.clear();
  //     qDebug() << "fetchStarted";
         lyricsTextEdit->setPlainText(QString("Attempting to fetch lyrics for %1 - %2, please wait...").arg(artist, title));
         setWindowTitle(QString("%1 - %2").arg(artist, title));
         manualDownloaderWindow->close();
+
+        fileMenu->actions()[1]->setEnabled(false);
+        editMenu->actions()[0]->setEnabled(false);
     });
 
     connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchComplete, [this](QString artist, QString title, QString lyrics, FetchResult result) {
@@ -59,8 +152,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     lyricsMenu->addAction("&Go to current track", this, [&] {
         trackChanged(mostRecentArtist, mostRecentTitle, mostRecentTrackPath);
+#ifdef Q_OS_WIN
         if (foobarNowPlayingAnnouncer != nullptr)
             foobarNowPlayingAnnouncer->reEmitLastTrack();
+#endif
     });
     lyricsMenu->actions()[1]->setEnabled(false);
 
@@ -106,11 +201,15 @@ void MainWindow::trackChanged(QString artist, QString title, QString path) {
 
     mostRecentArtist = artist;
     mostRecentTitle = title;
+    mostRecentTrackPath = path;
 
+    fileMenu->actions()[1]->setEnabled( mostRecentTrackPath.length() > 0 );
+    editMenu->actions()[0]->setEnabled( mostRecentTrackPath.length() > 0 );
     lyricsMenu->actions()[1]->setEnabled( mostRecentTrackPath.length() > 0 );
 
     QString lyrics = lyricsForFile(path);
     if (lyrics.length() > 0) {
+        exitEditMode();
         lyricsTextEdit->setPlainText(lyrics);
         setWindowTitle(QString("%1 - %2").arg(artist, title));
 
