@@ -27,8 +27,8 @@ ReverseSearchWindow::ReverseSearchWindow(QWidget *parent) : QWidget(parent) {
         });
 
         reverseIndexProgressDialog->show();
-        reverseSearchModel->updateIndex();
         Application::processEvents();
+        reverseSearchModel->updateIndex();
     });
 
     connect(reverseSearchModel, &ReverseSearchModel::indexingStarted, [&](int total) {
