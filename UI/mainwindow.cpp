@@ -10,7 +10,7 @@
 
 void MainWindow::enterEditMode() {
     qDebug() << "Enter edit mode";
-    editMenu->actions()[0]->setText("Exit &edit mode");
+    editModeAction->setText("Exit &edit mode");
     lyricsTextEdit->setReadOnly(false);
 
     auto palette = lyricsTextEdit->palette();
@@ -21,7 +21,7 @@ void MainWindow::enterEditMode() {
 
 void MainWindow::exitEditMode() {
     qDebug() << "Exit edit mode";
-    editMenu->actions()[0]->setText("Enter &edit mode");
+    editModeAction->setText("Enter &edit mode");
     lyricsTextEdit->setReadOnly(true);
 
     auto palette = lyricsTextEdit->palette();
@@ -111,11 +111,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         configDialog->loadSettings();
         configDialog->exec();
     });
-    fileMenu->addAction("&Save", this, &MainWindow::save, QKeySequence::Save);
+    saveAction = fileMenu->addAction("&Save", this, &MainWindow::save, QKeySequence::Save);
     fileMenu->addSeparator();
     fileMenu->addAction("E&xit", this, [&] { QApplication::quit(); }, QKeySequence::Quit);
 
-    editMenu->addAction("Enter &edit mode", this, [&] {
+    editModeAction = editMenu->addAction("Enter &edit mode", this, [&] {
         if (lyricsTextEdit->isReadOnly()) {
             enterEditMode();
         }
@@ -123,7 +123,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
             exitEditMode();
         }
     }, Qt::CTRL + Qt::Key_E);
-    editMenu->actions()[0]->setEnabled(false); // Enabled when a local track (with a known path) is played; disabled again on manual search
+    editModeAction->setEnabled(false); // Enabled when a local track (with a known path) is played; disabled again on manual search
 
     manualDownloaderWindow = new ManualDownloaderWindow(this);
     manualDownloaderWindow->setModal(true);
@@ -141,8 +141,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         setWindowTitle(QString("%1 - %2").arg(artist, title));
         manualDownloaderWindow->close();
 
-        fileMenu->actions()[1]->setEnabled(false);
-        editMenu->actions()[0]->setEnabled(false);
+        saveAction->setEnabled(false);
+        editModeAction->setEnabled(false);
     });
 
     connect(manualDownloaderWindow, &ManualDownloaderWindow::fetchComplete, [this](QString artist, QString title, QString lyrics, FetchResult result) {
@@ -163,13 +163,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         manualDownloaderWindow->exec();
     }, QKeySequence::New);
 
-    lyricsMenu->addAction("&Go to current track", this, [&] {
+    goToCurrentAction = lyricsMenu->addAction("&Go to current track", this, [&] {
 #ifdef Q_OS_WIN
         if (foobarNowPlayingAnnouncer != nullptr)
             foobarNowPlayingAnnouncer->reEmitLastTrack();
 #endif
     });
-    lyricsMenu->actions()[1]->setEnabled(false);
+    goToCurrentAction->setEnabled(false);
 
     lyricsMenu->addAction("&Lyric downloader", this, [&] {
         if (lyricDownloaderWindow == nullptr)
@@ -215,9 +215,9 @@ void MainWindow::trackChanged(QString artist, QString title, QString path) {
     mostRecentTitle = title;
     mostRecentTrackPath = path;
 
-    fileMenu->actions()[1]->setEnabled( mostRecentTrackPath.length() > 0 );
-    editMenu->actions()[0]->setEnabled( mostRecentTrackPath.length() > 0 );
-    lyricsMenu->actions()[1]->setEnabled( mostRecentTrackPath.length() > 0 );
+    saveAction->setEnabled( mostRecentTrackPath.length() > 0 );
+    editModeAction->setEnabled( mostRecentTrackPath.length() > 0 );
+    goToCurrentAction->setEnabled( mostRecentTrackPath.length() > 0 );
 
     QString lyrics = lyricsForFile(path);
     if (lyrics.length() > 0) {
