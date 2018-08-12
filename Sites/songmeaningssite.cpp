@@ -5,6 +5,8 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
 
+#define USER_AGENT "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36"
+
 SongmeaningsSite::SongmeaningsSite() {
 }
 
@@ -24,7 +26,7 @@ void SongmeaningsSite::fetchLyrics(const QString &artist, const QString &title, 
         QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
 //      qDebug() << "URL was cached!" << artist << "-" << title << "==>" << url;
         QNetworkRequest networkRequest(url);
-        networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
+        networkRequest.setRawHeader("User-Agent", USER_AGENT);
         QNetworkReply *reply = accessManager.get(networkRequest);
         QObject::connect(reply, &QNetworkReply::finished, [=] {
             lyricsPageResponseHandler(callback, reply);
@@ -35,11 +37,11 @@ void SongmeaningsSite::fetchLyrics(const QString &artist, const QString &title, 
 
     // If we got here, we had no such luck, and we'll have to start at the beginning.
     // QUrl handles escaping characters automatically, below
-    QString searchURL = QString("http://songmeanings.com/query/?query=%1&type=artists").arg(artist);
+    QString searchURL = QString("https://songmeanings.com/query/?query=%1&type=artists").arg(artist);
 
     QNetworkRequest networkRequest((QUrl(searchURL)));
     networkRequest.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
-    networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
+    networkRequest.setRawHeader("User-Agent", USER_AGENT);
     QNetworkReply *reply = accessManager.get(networkRequest);
     QObject::connect(reply, &QNetworkReply::finished, [=] {
         artistSearchResponseHandler(artist, title, callback, reply);
@@ -71,9 +73,9 @@ void SongmeaningsSite::artistSearchResponseHandler(const QString &artist, const 
         QString foundArtist = match.captured(2);
 
         if (simplifiedRepresentation(foundArtist) == simplifiedRepresentation(artist)) {
-            url = "http://songmeanings.com/" + url;
+            url = "https://songmeanings.com/" + url;
             QNetworkRequest networkRequest((QUrl(url)));
-            networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
+            networkRequest.setRawHeader("User-Agent", USER_AGENT);
             QNetworkReply *reply = accessManager.get(networkRequest);
             QObject::connect(reply, &QNetworkReply::finished, [=] {
                 artistPageResponseHandler(artist, title, callback, reply);
@@ -107,7 +109,7 @@ void SongmeaningsSite::parseArtistPage(const QString &artist, const QString &tit
     while (matchIterator.hasNext()) {
         // Parse and cache every track URL for future usage
         QRegularExpressionMatch match = matchIterator.next();
-        QString url = "http://songmeanings.com/" + match.captured(1);
+        QString url = "https://songmeanings.com/" + match.captured(1);
         QString foundTitle = simplifiedRepresentation(match.captured(2));
         titleURLCache[{simplifiedArtist, foundTitle}] = QUrl(url);
     }
@@ -116,7 +118,7 @@ void SongmeaningsSite::parseArtistPage(const QString &artist, const QString &tit
     if (titleURLCache.contains({simplifiedArtist, simplifiedTitle})) {
         QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
         QNetworkRequest networkRequest(url);
-        networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
+        networkRequest.setRawHeader("User-Agent", USER_AGENT);
         QNetworkReply *reply = accessManager.get(networkRequest);
         QObject::connect(reply, &QNetworkReply::finished, [=] {
             lyricsPageResponseHandler(callback, reply);
