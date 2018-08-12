@@ -61,12 +61,8 @@ void ManualDownloaderWindow::fetchLyrics(QString artist, QString title) {
         else
             emit fetchComplete(artist, title, "An error occured.", result);
     });
-
 }
 
 void ManualDownloaderWindow::validateFields() {
-    if (artistLineEdit->text().length() > 0 && titleLineEdit->text().length() > 0)
-        searchButton->setEnabled(true);
-    else
-        searchButton->setEnabled(false);
+    searchButton->setEnabled(artistLineEdit->text().length() > 0 && titleLineEdit->text().length() > 0);
 }

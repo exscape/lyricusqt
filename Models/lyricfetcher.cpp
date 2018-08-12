@@ -44,7 +44,7 @@ void LyricFetcher::fetchLyrics(const QString &artist, const QString &title, std:
     lyricSites.clear();
 
     auto sites = Application::getSetting("sitePriority").value<QVector<QPair<bool, QString>>>();
-    for (const QPair<bool, QString> site : sites) {
+    for (const QPair<bool, QString> &site : sites) {
         if (site.first && lyricSitesHash.contains(site.second)) {
             // If this site is enabled, add it to the list of sites to use.
             lyricSites.append(lyricSitesHash[site.second]);

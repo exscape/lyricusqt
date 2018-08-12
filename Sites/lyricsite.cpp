@@ -2,3 +2,6 @@
 
 LyricSite::LyricSite() {
 }
+
+LyricSite::~LyricSite() {
+}

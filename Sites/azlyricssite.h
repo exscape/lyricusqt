@@ -14,6 +14,7 @@ public:
     AZLyricsSite();
     void fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback) override;
     QString siteName() override { return "AZLyrics"; }
+    ~AZLyricsSite() override {}
 private:
     void artistSearchResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
     void artistPageResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);

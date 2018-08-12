@@ -14,6 +14,7 @@ public:
     DarkLyricsSite();
     void fetchLyrics(const QString &artist, const QString &title, std::function<void(const QString &, FetchResult)> callback) override;
     QString siteName() override { return "DarkLyrics"; }
+    ~DarkLyricsSite() override {}
 private:
     QPair<QString, FetchResult> getArtistURL(const QString &_artist) const;
     void artistPageResponseHandler(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback, QNetworkReply *reply);
