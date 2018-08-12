@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QAction>
+#include "Misc/application.h"
 
 LyricDownloaderWindow::LyricDownloaderWindow(QWidget *parent) : QWidget(parent) {
     qRegisterMetaType<LyricStatus>("LyricStatus");
@@ -196,6 +197,9 @@ void LyricDownloaderWindow::progressUpdate(int index, LyricStatus status) {
     progressBar->setValue(progressBar->value() + 1);
 
     fileList->repaint();
+
+    qDebug() << "ProcessEvents";
+    Application::processEvents();
 }
 
 bool LyricDownloaderWindow::eventFilter(QObject *target, QEvent *event) {

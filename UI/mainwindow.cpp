@@ -80,12 +80,12 @@ void MainWindow::save() {
 
         saveTimer->setInterval(0);
         saveTimer->start();
-    }
 #else
         if (!setLyricsForFile(mostRecentTrackPath, lyricsToSave)) {
             QMessageBox::warning(this, "Unable to save", QString("Unable to write lyrics to file %1.").arg(mostRecentTrackPath), QMessageBox::Ok);
         }
 #endif
+    }
 }
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
