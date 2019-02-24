@@ -196,10 +196,8 @@ void LyricDownloaderWindow::progressUpdate(int index, LyricStatus status) {
 
     progressBar->setValue(progressBar->value() + 1);
 
-    fileList->repaint();
-
-    qDebug() << "ProcessEvents";
     Application::processEvents();
+    fileList->repaint();
 }
 
 bool LyricDownloaderWindow::eventFilter(QObject *target, QEvent *event) {

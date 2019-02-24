@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QTime>
 
 class ReverseIndexProgressDialog : public QDialog
 {
@@ -13,7 +14,11 @@ class ReverseIndexProgressDialog : public QDialog
 
     QProgressBar *progressBar = nullptr;
     QHBoxLayout *hbox = nullptr;
+    QVBoxLayout *vbox = nullptr;
+    QLabel *estimatedRemainingLabel = nullptr;
     QPushButton *abortButton = nullptr;
+    QTime *time = nullptr;
+    int lastUpdateTime = 0;
 
 public:
     ReverseIndexProgressDialog(QWidget *parent);
