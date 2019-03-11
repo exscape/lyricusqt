@@ -10,6 +10,8 @@
 #include <QPlainTextEdit>
 #include <QThread>
 #ifdef Q_OS_WIN
+#include <QTimer>
+#include <QHash>
 #include "Misc/foobarnowplayingannouncer.h"
 #endif
 
@@ -29,6 +31,7 @@ class MainWindow : public QMainWindow
 
 #ifdef Q_OS_WIN
     FoobarNowPlayingAnnouncer *foobarNowPlayingAnnouncer = nullptr;
+    QHash<QString, QTimer*> saveTimers;
 #endif
 
     QString fetchArtist;

@@ -40,18 +40,36 @@ void MainWindow::save() {
             qDebug() << "Lyrics were unchanged; ignoring save request";
             return;
         }
+        else
+            originalLyrics = lyricsToSave; // This is required to avoid a bug: editing, saving, reverting and saving again will ignore the revert.
 
         // On Windows, we can't write to the file if it's open in a music player.
         // Wait until it's not. There's absolutely a possible race condition here, but I'm not sure how to take care of that,
         // without modifying TagLib.
+        //
+        // Because we need to avoid starting multiple timers for a single path (in case the users edits, saves, then edits and saves again before the first save is written to disk),
+        // but still need to support multiple timers (one for each file that we're still trying to write to disk), we use a map structure (specifically QHash) to store the mappings
+        // between a file path and its QTimer.
+        // If a file path has no entry in the map, it's not currently being saved.
+        // If the map is empty, *no* file is currently being saved.
+
 #ifdef Q_OS_WIN
-        QTimer *saveTimer = new QTimer;
-        saveTimer->setTimerType(Qt::VeryCoarseTimer);
+        QTimer *saveTimer = saveTimers.value(mostRecentTrackPath, nullptr);
+        if (saveTimer == nullptr) {
+            saveTimer = new QTimer;
+            saveTimer->setTimerType(Qt::VeryCoarseTimer);
+            saveTimers[mostRecentTrackPath] = saveTimer;
+        }
+        else {
+            qDebug() << "Stopping saveTimer" << saveTimer << "for path" << mostRecentTrackPath << "and restarting with updated lyrics";
+            saveTimer->stop();
+            saveTimer->disconnect();
+        }
 
         // x = x copies the variable, as C++11 lambdas can't capture class members by value ordinarily.
         connect(saveTimer, QTimer::timeout, [this, saveTimer, mostRecentTrackPath = mostRecentTrackPath, lyricsToSave] {
             saveTimer->setInterval(5000);
-            qDebug() << "In timer, mostRecent... =" << mostRecentTrackPath;
+            qDebug() << "In timer" << saveTimer << ", mostRecent... =" << mostRecentTrackPath;
 
             HANDLE ret = CreateFile(mostRecentTrackPath.toStdWString().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
             if (ret == INVALID_HANDLE_VALUE && GetLastError() == ERROR_SHARING_VIOLATION) {
@@ -70,12 +88,15 @@ void MainWindow::save() {
                 if (!setLyricsForFile(mostRecentTrackPath, lyricsToSave)) {
                     QMessageBox::warning(this, "Unable to save", QString("Unable to write lyrics to file %1.").arg(mostRecentTrackPath), QMessageBox::Ok);
                 }
-                else
+                else {
                     qDebug() << "Save to " << mostRecentTrackPath << "successful!";
+                }
             }
 
             disconnect(saveTimer);
             saveTimer->deleteLater();
+            saveTimers.remove(mostRecentTrackPath);
+            qDebug() << "Disconnected and removed saveTimer" << saveTimer << "for path" << mostRecentTrackPath;
         });
 
         saveTimer->setInterval(0);
@@ -83,6 +104,9 @@ void MainWindow::save() {
 #else
         if (!setLyricsForFile(mostRecentTrackPath, lyricsToSave)) {
             QMessageBox::warning(this, "Unable to save", QString("Unable to write lyrics to file %1.").arg(mostRecentTrackPath), QMessageBox::Ok);
+        }
+        else {
+            qDebug() << "Save to " << mostRecentTrackPath << "successful!";
         }
 #endif
     }
@@ -247,6 +271,20 @@ void MainWindow::closeEvent(QCloseEvent *closeEvent) {
         if (!lyricDownloaderWindow->close())
             shouldExit = false;
     }
+#ifdef Q_OS_WIN
+    // Ask the user if we should ignore a pending save.
+    if (shouldExit && saveTimers.size() != 0) {
+        QString paths;
+        for (const QString &path : saveTimers.keys()) {
+            paths.append(path + "\n");
+        }
+        paths.chop(1);
+        if (QMessageBox::information(this, "Discard lyric edits and exit?", "One or more lyric edits is not yet saved, as the files are in use.\nDo you want to discard your edits and exit anyway?\n\n"
+                                     "Affected file(s):\n" + paths, "Don't exit", "Discard and exit", QString(), 0, 0) == 0) {
+            shouldExit = false;
+        }
+    }
+#endif
 
     if (shouldExit)
         Application::quit();
