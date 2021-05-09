@@ -6,6 +6,8 @@
 #include <QtNetwork/QNetworkReply>
 
 AZLyricsSite::AZLyricsSite() {
+    sslConfig.setDefaultConfiguration(QSslConfiguration::defaultConfiguration());
+    sslConfig.setProtocol(QSsl::TlsV1_2OrLater);
 }
 
 void AZLyricsSite::fetchLyrics(const QString &artist, const QString &title, std::function<void (const QString &, FetchResult)> callback) {
@@ -24,7 +26,8 @@ void AZLyricsSite::fetchLyrics(const QString &artist, const QString &title, std:
         QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
 //      qDebug() << "URL was cached!" << artist << "-" << title << "==>" << url;
         QNetworkRequest networkRequest(url);
-        networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
+        networkRequest.setSslConfiguration(this->sslConfig);
+        networkRequest.setRawHeader("User-Agent", "Google Chrome 90");
         QNetworkReply *reply = accessManager.get(networkRequest);
         QObject::connect(reply, &QNetworkReply::finished, [=] {
             lyricsPageResponseHandler(callback, reply);
@@ -42,11 +45,13 @@ void AZLyricsSite::fetchLyrics(const QString &artist, const QString &title, std:
     // To take care of this, we use the search function to find the artist page URL.
 
     // QUrl handles escaping characters automatically, below
-    QString searchURL = QString("http://search.azlyrics.com/search.php?q=%1&p=0&w=artists").arg(artist);
+    QString searchURL = QString("https://search.azlyrics.com/search.php?q=%1&w=artists").arg(artist);
 
     QNetworkRequest networkRequest((QUrl(searchURL)));
-    networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
+    networkRequest.setSslConfiguration(this->sslConfig);
+    networkRequest.setRawHeader("User-Agent", "Google Chrome 90");
     QNetworkReply *reply = accessManager.get(networkRequest);
+
     QObject::connect(reply, &QNetworkReply::finished, [=] {
         artistSearchResponseHandler(artist, title, callback, reply);
     });
@@ -61,7 +66,7 @@ void AZLyricsSite::artistSearchResponseHandler(const QString &artist, const QStr
     }
 
     QString receivedHTML = QString(reply->readAll());
-    QRegularExpression re(R"##(<tr><td[^>]+>\s*\d+\.\s*<a href="(.*?)" target="_blank"><b>(.*?)</b></a>)##");
+    QRegularExpression re(R"##(<tr><td[^>]+>\s*-?\d+\.\s*<a href="(.*?)".*?><b>(.*?)</b></a>)##");
 
     QRegularExpressionMatchIterator matchIterator = re.globalMatch(receivedHTML);
 
@@ -72,7 +77,8 @@ void AZLyricsSite::artistSearchResponseHandler(const QString &artist, const QStr
 
         if (simplifiedRepresentation(artist) == simplifiedRepresentation(foundArtist)) {
             QNetworkRequest networkRequest((QUrl(url)));
-            networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
+            networkRequest.setSslConfiguration(this->sslConfig);
+            networkRequest.setRawHeader("User-Agent", "Google Chrome 90");
             QNetworkReply *reply = accessManager.get(networkRequest);
             QObject::connect(reply, &QNetworkReply::finished, [=] {
                 artistPageResponseHandler(artist, title, callback, reply);
@@ -95,7 +101,7 @@ void AZLyricsSite::artistPageResponseHandler(const QString &artist, const QStrin
     }
 
     QString receivedHTML = QString(reply->readAll());
-    QRegularExpression re(R"##(<a href="../(lyrics/.*)(?:\\d+#)?" target="_blank">(.*?)</a>)##");
+    QRegularExpression re(R"##(<a href="../(lyrics/.*)" target="_blank">(.*?)</a>)##");
 
     QRegularExpressionMatchIterator matchIterator = re.globalMatch(receivedHTML);
 
@@ -103,7 +109,7 @@ void AZLyricsSite::artistPageResponseHandler(const QString &artist, const QStrin
     QString simplifiedTitle = simplifiedRepresentation(title);
     while (matchIterator.hasNext()) {
         QRegularExpressionMatch match = matchIterator.next();
-        QString url = "http://www.azlyrics.com/" + match.captured(1);
+        QString url = "https://www.azlyrics.com/" + match.captured(1);
         QString foundTitle = simplifiedRepresentation(match.captured(2));
         titleURLCache[{simplifiedArtist, foundTitle}] = QUrl(url);
     }
@@ -113,7 +119,7 @@ void AZLyricsSite::artistPageResponseHandler(const QString &artist, const QStrin
         // since that works well in practice -- no need to actually parse with a proper HTML parser).
         QUrl url = titleURLCache[{simplifiedArtist, simplifiedTitle}];
         QNetworkRequest networkRequest(url);
-        networkRequest.setRawHeader("User-Agent", "Google Chrome 50");
+        networkRequest.setRawHeader("User-Agent", "Google Chrome 90");
         QNetworkReply *reply = accessManager.get(networkRequest);
         QObject::connect(reply, &QNetworkReply::finished, [=] {
             lyricsPageResponseHandler(callback, reply);

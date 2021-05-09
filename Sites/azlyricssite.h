@@ -23,6 +23,7 @@ private:
     QNetworkAccessManager accessManager;
     QHash<QPair<QString, QString>, QUrl> titleURLCache;
     QList<QString> nonExistentArtistCache;
+    QSslConfiguration sslConfig;
 };
 
 #endif // AZLYRICSSITE_H
