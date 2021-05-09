@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui sql network
-CONFIG += c++14
+CONFIG += c++17
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,7 +13,7 @@ TARGET = lyricusqt
 TEMPLATE = app
 
 win32 {
-    LIBS += $$PWD/taglib-1.11.1/taglib-release/taglib.dll
+    LIBS += -L$$PWD/taglib_from_vcpkg -ltag
     SOURCES += Misc/foobarnowplayingannouncer.cpp
     HEADERS += Misc/foobarnowplayingannouncer.h
 }
@@ -61,32 +61,29 @@ HEADERS  += \
     Models/lyricfetcher.h \
     Models/reversesearchmodel.h
 
-INCLUDEPATH += taglib-1.11.1
-INCLUDEPATH += taglib-1.11.1/taglib
-INCLUDEPATH += taglib-1.11.1/taglib/ape
-INCLUDEPATH += taglib-1.11.1/taglib/asf
-INCLUDEPATH += taglib-1.11.1/taglib/flac
-INCLUDEPATH += taglib-1.11.1/taglib/it
-INCLUDEPATH += taglib-1.11.1/taglib/mp4
-INCLUDEPATH += taglib-1.11.1/taglib/mod
-INCLUDEPATH += taglib-1.11.1/taglib/mpc
-INCLUDEPATH += taglib-1.11.1/taglib/mpeg
-INCLUDEPATH += taglib-1.11.1/taglib/ogg
-INCLUDEPATH += taglib-1.11.1/taglib/riff
-INCLUDEPATH += taglib-1.11.1/taglib/s3m
-INCLUDEPATH += taglib-1.11.1/taglib/toolkit
-INCLUDEPATH += taglib-1.11.1/taglib/trueaudio
-INCLUDEPATH += taglib-1.11.1/taglib/wavpack
-INCLUDEPATH += taglib-1.11.1/taglib/xm
-INCLUDEPATH += taglib-1.11.1/taglib/mpeg/id3v1
-INCLUDEPATH += taglib-1.11.1/taglib/mpeg/id3v2
-INCLUDEPATH += taglib-1.11.1/taglib/mpeg/id3v2/frames
-INCLUDEPATH += taglib-1.11.1/taglib/ogg/flac
-INCLUDEPATH += taglib-1.11.1/taglib/ogg/speex
-INCLUDEPATH += taglib-1.11.1/taglib/ogg/vorbis
-INCLUDEPATH += taglib-1.11.1/taglib/ogg/opus
-INCLUDEPATH += taglib-1.11.1/taglib/riff/aiff
-INCLUDEPATH += taglib-1.11.1/taglib/riff/wav
-
-SUBDIRS += \
-    taglib-1.11.1/taglib/taglib.pro
+INCLUDEPATH += $$PWD/taglib_from_vcpkg
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/ape
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/asf
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/flac
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/it
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/mp4
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/mod
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/mpc
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/mpeg
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/ogg
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/riff
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/s3m
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/toolkit
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/trueaudio
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/wavpack
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/xm
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/mpeg/id3v1
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/mpeg/id3v2
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/mpeg/id3v2/frames
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/ogg/flac
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/ogg/speex
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/ogg/vorbis
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/ogg/opus
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/riff/aiff
+INCLUDEPATH += $$PWD/taglib_from_vcpkg/taglib/riff/wav
