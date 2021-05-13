@@ -49,9 +49,11 @@ class MainWindow : public QMainWindow
     QMenu *fileMenu = nullptr;
     QMenu *editMenu = nullptr;
     QMenu *lyricsMenu = nullptr;
+    QMenu *displayMenu = nullptr;
     QAction *saveAction = nullptr;
     QAction *editModeAction = nullptr;
     QAction *goToCurrentAction = nullptr;
+    QAction *alwaysOnTopAction = nullptr;
 
     QColor defaultBackgroundColor;
 

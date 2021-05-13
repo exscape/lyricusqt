@@ -121,9 +121,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     fileMenu = new QMenu("&File", menuBar);
     editMenu = new QMenu("&Edit", menuBar);
     lyricsMenu = new QMenu("&Lyrics", menuBar);
+    displayMenu = new QMenu("&Display", menuBar);
     menuBar->addMenu(fileMenu);
     menuBar->addMenu(editMenu);
     menuBar->addMenu(lyricsMenu);
+    menuBar->addMenu(displayMenu);
     this->setMenuBar(menuBar);
 
     fileMenu->addAction("&Preferences", this, [&] {
@@ -186,6 +188,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         manualDownloaderWindow->setArtistAndTitle(mostRecentArtist, mostRecentTitle);
         manualDownloaderWindow->exec();
     }, QKeySequence::New);
+
+    alwaysOnTopAction = displayMenu->addAction("&Always on top", this, [&] {
+        auto flags = windowFlags();
+
+        bool alwaysOnTop = (flags & Qt::WindowStaysOnTopHint) != 0;
+        if (alwaysOnTop) {
+            setWindowFlags (flags & ~Qt::WindowStaysOnTopHint);
+        }
+        else
+            setWindowFlags(flags | Qt::WindowStaysOnTopHint);
+
+        alwaysOnTopAction->setChecked(!alwaysOnTop);
+        show();
+    });
+
+    alwaysOnTopAction->setCheckable(true);
 
     goToCurrentAction = lyricsMenu->addAction("&Go to current track", this, [&] {
 #ifdef Q_OS_WIN
